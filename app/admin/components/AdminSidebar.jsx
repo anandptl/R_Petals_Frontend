@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
     Store,
-    ClipboardCheck,
     Tags,
     Package,
     ShoppingCart,
@@ -16,6 +15,8 @@ import {
     X,
 } from 'lucide-react';
 
+import { logout } from '@/lib/auth';
+
 export default function AdminSidebar() {
 
     const router = useRouter();
@@ -23,10 +24,17 @@ export default function AdminSidebar() {
 
     const [mobileOpen, setMobileOpen] = useState(false);
 
+
     useEffect(() => {
         setMobileOpen(false);
     }, [pathname]);
 
+
+    /*
+    =========================================================
+    BODY SCROLL CONTROL
+    =========================================================
+    */
 
     useEffect(() => {
 
@@ -43,45 +51,50 @@ export default function AdminSidebar() {
     }, [mobileOpen]);
 
 
+    /*
+    =========================================================
+    LOGOUT
+    =========================================================
+    */
+
     const handleLogout = async () => {
-        const token = localStorage.getItem("accessToken");
 
         try {
-            if (token) {
-                await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/logout`,
-                    {
-                        method: "POST",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-            }
+
+            await logout();
+
         } catch (error) {
-            console.error("Logout error:", error);
+
+            console.error(  'Logout error:', error );
+
         } finally {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("role");
-            localStorage.removeItem("rpetalsUser");
 
-            setUser(null);
-            setMenuOpen(false);
-            setProfileMenuOpen(false);
-            setMobileProfileOpen(false);
+            setMobileOpen(false);
 
-            router.replace("/login");
+            router.replace('/login');
         }
     };
+
+
+    /*
+    =========================================================
+    NAVIGATION
+    =========================================================
+    */
 
     const navigate = (path) => {
 
         router.push(path);
 
-        // Mobile par click ke baad close
         setMobileOpen(false);
     };
 
+
+    /*
+    =========================================================
+    ACTIVE MENU
+    =========================================================
+    */
 
     const isActive = (path) => {
 
@@ -89,21 +102,54 @@ export default function AdminSidebar() {
             return pathname === '/admin';
         }
 
-        return pathname === path ||
-            pathname.startsWith(`${path}/`);
+        return (
+            pathname === path ||
+            pathname.startsWith(`${path}/`)
+        );
     };
 
 
     return (
         <>
+            {/* ================================================= */}
+            {/* MOBILE HEADER */}
+            {/* ================================================= */}
 
-            <header className="lg:hidden fixed top-0 left-0 right-0 z-40 h-[68px] bg-white border-b border-[#e9e5e6] flex items-center justify-between px-4">
+            <header
+                className="
+                    lg:hidden
+                    fixed
+                    top-0
+                    left-0
+                    right-0
+                    z-40
+                    h-[68px]
+                    bg-white
+                    border-b
+                    border-[#e9e5e6]
+                    flex
+                    items-center
+                    justify-between
+                    px-4
+                "
+            >
 
                 <div className="flex items-center gap-3">
 
                     <button
                         onClick={() => setMobileOpen(true)}
-                        className="w-10 h-10 rounded-xl bg-[#faf7f8] text-[#694f5c] flex items-center justify-center hover:bg-[#eee5e9] transition"
+                        className="
+                            w-10
+                            h-10
+                            rounded-xl
+                            bg-[#faf7f8]
+                            text-[#694f5c]
+                            flex
+                            items-center
+                            justify-center
+                            hover:bg-[#eee5e9]
+                            transition
+                        "
                         aria-label="Open menu"
                     >
                         <Menu size={21} />
@@ -119,46 +165,93 @@ export default function AdminSidebar() {
                 </div>
 
 
-                <div className="w-9 h-9 rounded-xl bg-[#e7dce1] flex items-center justify-center text-[#6d5260] font-bold text-sm">
+                <div
+                    className="
+                        w-9
+                        h-9
+                        rounded-xl
+                        bg-[#e7dce1]
+                        flex
+                        items-center
+                        justify-center
+                        text-[#6d5260]
+                        font-bold
+                        text-sm
+                    "
+                >
                     A
                 </div>
 
             </header>
+
+
+            {/* ================================================= */}
+            {/* MOBILE OVERLAY */}
+            {/* ================================================= */}
 
             {mobileOpen && (
 
                 <button
                     aria-label="Close menu"
                     onClick={() => setMobileOpen(false)}
-                    className="lg:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px]"
+                    className="
+                        lg:hidden
+                        fixed
+                        inset-0
+                        z-40
+                        bg-black/30
+                        backdrop-blur-[1px]
+                    "
                 />
 
             )}
 
+
+            {/* ================================================= */}
+            {/* SIDEBAR */}
+            {/* ================================================= */}
+
             <aside
                 className={`
-          fixed
-          left-0
-          top-0
-          bottom-0
-          z-50
-          w-[270px]
-          bg-white
-          border-r
-          border-[#e9e5e6]
-          flex
-          flex-col
-          transition-transform
-          duration-300
-          ease-in-out
+                    fixed
+                    left-0
+                    top-0
+                    bottom-0
+                    z-50
+                    w-[270px]
+                    bg-white
+                    border-r
+                    border-[#e9e5e6]
+                    flex
+                    flex-col
+                    transition-transform
+                    duration-300
+                    ease-in-out
 
-          lg:translate-x-0
+                    lg:translate-x-0
 
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
+                    ${mobileOpen
+                        ? 'translate-x-0'
+                        : '-translate-x-full'
+                    }
+                `}
             >
 
-                <div className="h-[82px] px-6 flex items-center justify-between border-b border-[#eeeaea]">
+                {/* ================================================= */}
+                {/* LOGO */}
+                {/* ================================================= */}
+
+                <div
+                    className="
+                        h-[82px]
+                        px-6
+                        flex
+                        items-center
+                        justify-between
+                        border-b
+                        border-[#eeeaea]
+                    "
+                >
 
                     <img
                         src="/logo1.png"
@@ -171,7 +264,19 @@ export default function AdminSidebar() {
 
                     <button
                         onClick={() => setMobileOpen(false)}
-                        className="lg:hidden w-9 h-9 rounded-xl bg-[#faf7f8] text-[#694f5c] flex items-center justify-center hover:bg-[#eee5e9] transition"
+                        className="
+                            lg:hidden
+                            w-9
+                            h-9
+                            rounded-xl
+                            bg-[#faf7f8]
+                            text-[#694f5c]
+                            flex
+                            items-center
+                            justify-center
+                            hover:bg-[#eee5e9]
+                            transition
+                        "
                     >
                         <X size={19} />
                     </button>
@@ -179,24 +284,58 @@ export default function AdminSidebar() {
                 </div>
 
 
+                {/* ================================================= */}
+                {/* ADMIN PROFILE */}
+                {/* ================================================= */}
+
                 <div className="p-5">
 
-                    <div className="bg-[#faf7f8] rounded-2xl p-4">
+                    <div
+                        className="
+                            bg-[#faf7f8]
+                            rounded-2xl
+                            p-4
+                        "
+                    >
 
                         <div className="flex items-center gap-3">
 
-                            <div className="w-11 h-11 rounded-xl bg-[#e7dce1] flex items-center justify-center text-[#6d5260] font-bold">
+                            <div
+                                className="
+                                    w-11
+                                    h-11
+                                    rounded-xl
+                                    bg-[#e7dce1]
+                                    flex
+                                    items-center
+                                    justify-center
+                                    text-[#6d5260]
+                                    font-bold
+                                "
+                            >
                                 A
                             </div>
 
 
                             <div className="min-w-0">
 
-                                <p className="text-sm font-semibold truncate">
+                                <p
+                                    className="
+                                        text-sm
+                                        font-semibold
+                                        truncate
+                                    "
+                                >
                                     Administrator
                                 </p>
 
-                                <p className="text-xs text-[#8a8385] mt-1">
+                                <p
+                                    className="
+                                        text-xs
+                                        text-[#8a8385]
+                                        mt-1
+                                    "
+                                >
                                     ADMIN
                                 </p>
 
@@ -209,14 +348,26 @@ export default function AdminSidebar() {
                 </div>
 
 
+                {/* ================================================= */}
+                {/* NAVIGATION */}
+                {/* ================================================= */}
 
-                <nav className="px-4 space-y-1 overflow-y-auto flex-1">
+                <nav
+                    className="
+                        px-4
+                        space-y-1
+                        overflow-y-auto
+                        flex-1
+                    "
+                >
 
                     <SidebarItem
                         icon={<LayoutDashboard size={19} />}
                         title="Dashboard"
                         active={isActive('/admin')}
-                        onClick={() => navigate('/admin')}
+                        onClick={() =>
+                            navigate('/admin')
+                        }
                     />
 
 
@@ -224,14 +375,19 @@ export default function AdminSidebar() {
                         icon={<Store size={19} />}
                         title="Shops"
                         active={isActive('/admin/shops')}
-                        onClick={() => navigate('/admin/shops')}
+                        onClick={() =>
+                            navigate('/admin/shops')
+                        }
                     />
+
 
                     <SidebarItem
                         icon={<Tags size={19} />}
                         title="Categories"
                         active={isActive('/admin/categories')}
-                        onClick={() => navigate('/admin/categories')}
+                        onClick={() =>
+                            navigate('/admin/categories')
+                        }
                     />
 
 
@@ -239,7 +395,9 @@ export default function AdminSidebar() {
                         icon={<Package size={19} />}
                         title="Products"
                         active={isActive('/admin/products')}
-                        onClick={() => navigate('/admin/products')}
+                        onClick={() =>
+                            navigate('/admin/products')
+                        }
                     />
 
 
@@ -247,7 +405,9 @@ export default function AdminSidebar() {
                         icon={<ShoppingCart size={19} />}
                         title="Orders"
                         active={isActive('/admin/orders')}
-                        onClick={() => navigate('/admin/orders')}
+                        onClick={() =>
+                            navigate('/admin/orders')
+                        }
                     />
 
 
@@ -255,16 +415,42 @@ export default function AdminSidebar() {
                         icon={<Users size={19} />}
                         title="Users"
                         active={isActive('/admin/users')}
-                        onClick={() => navigate('/admin/users')}
+                        onClick={() =>
+                            navigate('/admin/users')
+                        }
                     />
 
                 </nav>
 
-                <div className="p-5 border-t border-[#eeeaea]">
+
+                {/* ================================================= */}
+                {/* LOGOUT */}
+                {/* ================================================= */}
+
+                <div
+                    className="
+                        p-5
+                        border-t
+                        border-[#eeeaea]
+                    "
+                >
 
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#8b4f5d] hover:bg-[#faf1f3] transition"
+                        className="
+                            w-full
+                            flex
+                            items-center
+                            gap-3
+                            px-4
+                            py-3
+                            rounded-xl
+                            text-sm
+                            font-medium
+                            text-[#8b4f5d]
+                            hover:bg-[#faf1f3]
+                            transition
+                        "
                     >
 
                         <LogOut size={18} />
@@ -281,6 +467,12 @@ export default function AdminSidebar() {
 }
 
 
+/*
+=========================================================
+SIDEBAR ITEM
+=========================================================
+*/
+
 function SidebarItem({
     icon,
     title,
@@ -289,30 +481,39 @@ function SidebarItem({
 }) {
 
     return (
+
         <button
             onClick={onClick}
             className={`
-        w-full
-        flex
-        items-center
-        gap-3
-        px-4
-        py-3
-        rounded-xl
-        text-sm
-        font-medium
-        transition
+                w-full
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-xl
+                text-sm
+                font-medium
+                transition
 
-        ${active
+                ${active
                     ? 'bg-[#eee5e9] text-[#694f5c]'
                     : 'text-[#706a6c] hover:bg-[#faf7f8] hover:text-[#694f5c]'
                 }
-      `}
+            `}
         >
 
-            <span className="w-6 flex justify-center shrink-0">
+            <span
+                className="
+                    w-6
+                    flex
+                    justify-center
+                    shrink-0
+                "
+            >
                 {icon}
             </span>
+
 
             <span>
                 {title}

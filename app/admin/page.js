@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Store, Clock3, Package } from 'lucide-react';
-import AdminSidebar from './components/AdminSidebar';
+import AdminSidebar from '@/app/admin/components/AdminSidebar';
 
 export default function AdminPage() {
     const router = useRouter();
