@@ -13,9 +13,9 @@ export default function AdminPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
     const [dashboard, setDashboard] = useState({
-        totalShops: 0,
-        pendingApprovals: 0,
+        totalStores: 0,
         totalProducts: 0,
+        todayOrders: 0,
         totalOrders: 0,
     });
 
@@ -169,29 +169,29 @@ export default function AdminPage() {
                     <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mt-8">
 
                         <StatCard
-                            title="Total Shops"
-                            value={dashboardLoading ? "..." : dashboard.totalShops}
+                            title="Total Stores"
+                            value={dashboardLoading ? "..." : (dashboard?.totalStores ?? 0)}
                             icon="🏪"
                             accent="bg-[#e8eef2]"
                         />
 
                         <StatCard
-                            title="Pending Approvals"
-                            value={dashboardLoading ? "..." : dashboard.pendingApprovals}
-                            icon="✓"
-                            accent="bg-[#f3e9df]"
-                        />
-
-                        <StatCard
                             title="Total Products"
-                            value={dashboardLoading ? "..." : dashboard.totalProducts}
+                            value={dashboardLoading ? "..." : (dashboard?.totalProducts ?? 0)}
                             icon="📦"
                             accent="bg-[#eee4eb]"
                         />
 
                         <StatCard
+                            title="Today's Orders"
+                            value={dashboardLoading ? "..." : (dashboard?.todayOrders ?? 0)}
+                            icon="✓"
+                            accent="bg-[#f3e9df]"
+                        />
+
+                        <StatCard
                             title="Total Orders"
-                            value={dashboardLoading ? "..." : dashboard.totalOrders}
+                            value={dashboardLoading ? "..." : (dashboard?.totalOrders ?? 0)}
                             icon="▤"
                             accent="bg-[#e5eee9]"
                         />
@@ -224,13 +224,6 @@ export default function AdminPage() {
                             />
 
                             <ManagementCard
-                                icon={<Clock3 size={22} strokeWidth={2} />}
-                                title="Shop Approvals"
-                                description="Review and approve shopkeeper registrations."
-                                onClick={() => router.push('/admin/shops')}
-                            />
-
-                            <ManagementCard
                                 icon="◈"
                                 title="Categories"
                                 description="Create and manage product categories."
@@ -238,23 +231,9 @@ export default function AdminPage() {
                             />
 
                             <ManagementCard
-                                icon="◇"
-                                title="Subcategories"
-                                description="Manage category-wise subcategories."
-                                onClick={() => router.push('/admin/categories')}
-                            />
-
-                            <ManagementCard
                                 icon={<Package size={22} strokeWidth={2} />}
                                 title="Products"
                                 description="Add, update and remove products."
-                                onClick={() => router.push('/admin/products')}
-                            />
-
-                            <ManagementCard
-                                icon="▧"
-                                title="Product Images"
-                                description="Manage product images and media."
                                 onClick={() => router.push('/admin/products')}
                             />
 
