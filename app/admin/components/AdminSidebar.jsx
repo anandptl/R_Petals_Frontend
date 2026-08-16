@@ -43,35 +43,34 @@ export default function AdminSidebar() {
     }, [mobileOpen]);
 
 
-    const logout = async () => {
-
-        const token =
-            localStorage.getItem("token");
+    const handleLogout = async () => {
+        const token = localStorage.getItem("accessToken");
 
         try {
-
             if (token) {
-
                 await fetch(
                     `${process.env.NEXT_PUBLIC_API_URL}/api/logout`,
                     {
                         method: "POST",
-
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }
                 );
             }
-
         } catch (error) {
             console.error("Logout error:", error);
         } finally {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("role");
+            localStorage.removeItem("rpetalsUser");
 
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
+            setUser(null);
+            setMenuOpen(false);
+            setProfileMenuOpen(false);
+            setMobileProfileOpen(false);
 
-            window.location.href = "/login";
+            router.replace("/login");
         }
     };
 
@@ -155,10 +154,7 @@ export default function AdminSidebar() {
 
           lg:translate-x-0
 
-          ${mobileOpen
-                        ? 'translate-x-0'
-                        : '-translate-x-full'
-                    }
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
             >
 
@@ -267,7 +263,7 @@ export default function AdminSidebar() {
                 <div className="p-5 border-t border-[#eeeaea]">
 
                     <button
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#8b4f5d] hover:bg-[#faf1f3] transition"
                     >
 
