@@ -1,5 +1,6 @@
 import { EB_Garamond, Hanken_Grotesk } from 'next/font/google';
 import './globals.css';
+import AuthSessionGuard from './components/AuthSessionGuard';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href={materialSymbols.url} crossOrigin="anonymous" />
       </head>
       <body className="bg-background text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+        <AuthSessionGuard />
         {children}
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Store, Clock3, Package } from 'lucide-react';
 import AdminSidebar from '@/app/admin/components/AdminSidebar';
+import { apiFetch, initializeAuthSession } from '@/lib/auth';
 
 export default function AdminPage() {
     const router = useRouter();
@@ -22,6 +23,8 @@ export default function AdminPage() {
     const [dashboardLoading, setDashboardLoading] = useState(true);
 
     useEffect(() => {
+
+        initializeAuthSession();
 
         const token = localStorage.getItem('accessToken');
         const role = localStorage.getItem('role');
@@ -49,18 +52,19 @@ export default function AdminPage() {
 
             try {
 
-                const response = await fetch(
+                const response = await apiFetch(
                     `${API_URL}/admin/dashboard`,
                     {
                         method: 'GET',
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
                     }
                 );
 
                 const result = await response.json();
+
+                if (response.status === 401) {
+                    router.replace('/login?redirect=/admin');
+                    return;
+                }
 
                 if (!response.ok || !result.success) {
                     throw new Error(
@@ -218,9 +222,9 @@ export default function AdminPage() {
 
                             <ManagementCard
                                 icon={<Store size={22} strokeWidth={2} />}
-                                title="Shops"
-                                description="View and manage all registered shops."
-                                onClick={() => router.push('/admin/shops')}
+                                title="Stores"
+                                description="View and manage all registered stores."
+                                onClick={() => router.push('/admin/stores')}
                             />
 
                             <ManagementCard

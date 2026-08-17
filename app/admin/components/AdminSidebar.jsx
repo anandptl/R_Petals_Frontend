@@ -3,17 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-import {
-    LayoutDashboard,
-    Store,
-    Tags,
-    Package,
-    ShoppingCart,
-    Users,
-    LogOut,
-    Menu,
-    X,
-} from 'lucide-react';
+import { LayoutDashboard,Store, Tags, Package, ShoppingCart, Users, LogOut, Menu, X, Activity} from 'lucide-react';
 
 import { logout } from '@/lib/auth';
 
@@ -30,12 +20,7 @@ export default function AdminSidebar() {
     }, [pathname]);
 
 
-    /*
-    =========================================================
-    BODY SCROLL CONTROL
-    =========================================================
-    */
-
+    // BODY SCROLL CONTROL
     useEffect(() => {
 
         if (mobileOpen) {
@@ -51,11 +36,7 @@ export default function AdminSidebar() {
     }, [mobileOpen]);
 
 
-    /*
-    =========================================================
-    LOGOUT
-    =========================================================
-    */
+   //LOGOUT
 
     const handleLogout = async () => {
 
@@ -76,11 +57,7 @@ export default function AdminSidebar() {
     };
 
 
-    /*
-    =========================================================
-    NAVIGATION
-    =========================================================
-    */
+    // NAVIGATION
 
     const navigate = (path) => {
 
@@ -90,11 +67,7 @@ export default function AdminSidebar() {
     };
 
 
-    /*
-    =========================================================
-    ACTIVE MENU
-    =========================================================
-    */
+    /*ACTIVE MENU */
 
     const isActive = (path) => {
 
@@ -111,9 +84,7 @@ export default function AdminSidebar() {
 
     return (
         <>
-            {/* ================================================= */}
             {/* MOBILE HEADER */}
-            {/* ================================================= */}
 
             <header
                 className="
@@ -185,9 +156,7 @@ export default function AdminSidebar() {
             </header>
 
 
-            {/* ================================================= */}
             {/* MOBILE OVERLAY */}
-            {/* ================================================= */}
 
             {mobileOpen && (
 
@@ -207,9 +176,7 @@ export default function AdminSidebar() {
             )}
 
 
-            {/* ================================================= */}
             {/* SIDEBAR */}
-            {/* ================================================= */}
 
             <aside
                 className={`
@@ -237,9 +204,7 @@ export default function AdminSidebar() {
                 `}
             >
 
-                {/* ================================================= */}
                 {/* LOGO */}
-                {/* ================================================= */}
 
                 <div
                     className="
@@ -284,9 +249,7 @@ export default function AdminSidebar() {
                 </div>
 
 
-                {/* ================================================= */}
                 {/* ADMIN PROFILE */}
-                {/* ================================================= */}
 
                 <div className="p-5">
 
@@ -347,10 +310,7 @@ export default function AdminSidebar() {
 
                 </div>
 
-
-                {/* ================================================= */}
                 {/* NAVIGATION */}
-                {/* ================================================= */}
 
                 <nav
                     className="
@@ -373,10 +333,20 @@ export default function AdminSidebar() {
 
                     <SidebarItem
                         icon={<Store size={19} />}
-                        title="Shops"
-                        active={isActive('/admin/shops')}
+                        title="Stores"
+                        active={isActive('/admin/stores')}
                         onClick={() =>
-                            navigate('/admin/shops')
+                            navigate('/admin/stores')
+                        }
+                    />
+
+
+                    <SidebarItem
+                        icon={<Activity size={19} />}
+                        title="Active Stores"
+                        active={isActive('/admin/active-stores')}
+                        onClick={() =>
+                            navigate('/admin/active-stores')
                         }
                     />
 
@@ -422,10 +392,7 @@ export default function AdminSidebar() {
 
                 </nav>
 
-
-                {/* ================================================= */}
                 {/* LOGOUT */}
-                {/* ================================================= */}
 
                 <div
                     className="

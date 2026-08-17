@@ -63,17 +63,6 @@ export default function LoginPage() {
   }, []);
 
 
-  /*
-  =========================================================
-  RESTORE EXISTING SESSION
-  =========================================================
-
-  If accessToken is missing but refresh-token cookie is
-  still valid, get a new accessToken from backend.
-
-  This is useful when user comes to /login while their
-  refresh session is still active.
-  */
 
   useEffect(() => {
 
@@ -128,7 +117,7 @@ export default function LoginPage() {
 
         } else if (role === 'SHOPKEEPER') {
 
-          router.replace('/shopkeeper');
+          router.replace('/darkStore');
 
         } else if (role === 'USER') {
 
