@@ -86,7 +86,7 @@ export default function AdminPage() {
         const loadStoreStatus = async () => {
             try {
                 setStoreStatusLoading(true);
-                const response = await apiFetch(`${API_URL}/admin/stores/status`, {
+                const response = await apiFetch(`${API_URL}/admin/stores`, {
                     method: 'GET'
                 });
 

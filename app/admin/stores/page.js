@@ -431,59 +431,42 @@ export default function ShopAdminDashboard() {
                                             .slice(0, 6)
                                             .map((store, index) => {
 
-                                                const shop =
-                                                    store?.shop ||
-                                                    store?.store ||
-                                                    store ||
-                                                    {};
-
-
-                                                const user =
-                                                    store?.user ||
-                                                    store?.userInfo ||
-                                                    store?.owner ||
-                                                    {};
-
-
                                                 const shopName =
-                                                    shop.shopName ||
+                                                    store?.shopName ||
+                                                    store?.shop?.shopName ||
                                                     '—';
-
 
                                                 const userName =
-                                                    user.fullName ||
+                                                    store?.userName ||
+                                                    store?.user?.fullName ||
                                                     '—';
-
 
                                                 const mobileNumber =
-                                                    user.mobileNumber ||
+                                                    store?.mobileNumber ||
+                                                    store?.user?.mobileNumber ||
                                                     '—';
 
-
-                                                const fullAddress =
-                                                    [
-                                                        shop.address,
-                                                        shop.city,
-                                                        shop.state,
-                                                        shop.pincode
-                                                    ]
-                                                        .filter(
-                                                            (value) =>
-                                                                value !== null &&
-                                                                value !== undefined &&
-                                                                String(value).trim() !== ''
-                                                        )
-                                                        .map(
-                                                            (value) =>
-                                                                String(value).trim()
-                                                        )
-                                                        .join(', ');
-
+                                                const fullAddress = [
+                                                    store?.address || store?.shop?.address,
+                                                    store?.city || store?.shop?.city,
+                                                    store?.state || store?.shop?.state,
+                                                    store?.pincode || store?.shop?.pincode
+                                                ]
+                                                    .filter(
+                                                        (value) =>
+                                                            value !== null &&
+                                                            value !== undefined &&
+                                                            String(value).trim() !== ''
+                                                    )
+                                                    .map(
+                                                        (value) => String(value).trim()
+                                                    )
+                                                    .join(', ');
 
                                                 const createdAt =
-                                                    shop.createdAt ||
-                                                    store.createdAt ||
-                                                    store.registeredAt;
+                                                    store?.createdAt ||
+                                                    store?.shop?.createdAt ||
+                                                    store?.registeredAt;
 
 
                                                 return (
