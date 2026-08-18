@@ -2,128 +2,299 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+
 import {
     Store,
     MapPin,
-    Navigation,
     Building2,
     MapPinned,
     Loader2,
-    CheckCircle2
+    CheckCircle2,
+    LocateFixed,
+    User,
+    Phone,
+    Mail,
+    Globe,
+    ArrowLeft,
+    Navigation,
+    Search,
+    X
 } from 'lucide-react';
 
 import AdminSidebar from '@/app/admin/components/AdminSidebar';
+import { apiFetch } from '@/lib/auth';
 
 export default function RegisterStoresPage() {
 
     const router = useRouter();
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
     const [loading, setLoading] = useState(false);
-    const [locationLoading, setLocationLoading] = useState(false);
+
+    const [gpsLoading, setGpsLoading] = useState(false);
+
+    const [addressLoading, setAddressLoading] =
+        useState(false);
+
+    const [pincodeLoading, setPincodeLoading] =
+        useState(false);
 
     const [error, setError] = useState('');
+
     const [message, setMessage] = useState('');
 
     const [formData, setFormData] = useState({
+
         shopName: '',
+        shopkeeperName: '',
+        mobile: '',
+        email: '',
+        country: 'India',
+
         address: '',
         city: '',
         state: '',
         pincode: '',
+
         latitude: '',
         longitude: ''
     });
 
-    // Handle input change
-    const handleChange = async (e) => {
 
-        const { name, value } = e.target;
+    // =========================================================
+    // CLEAR ALERTS
+    // =========================================================
+
+    const clearAlerts = () => {
 
         setError('');
         setMessage('');
+    };
 
-        // Pincode 6 digits se kam hai
-        if (name === 'pincode' && value.length < 6) {
 
-            setFormData((prev) => ({
-                ...prev,
-                pincode: value,
-                city: '',
-                state: ''
-            }));
+    // =========================================================
+    // UPDATE FORM
+    // =========================================================
+
+    const updateForm = (changes) => {
+
+        setFormData((prev) => ({
+            ...prev,
+            ...changes
+        }));
+    };
+
+
+    // =========================================================
+    // HANDLE INPUT CHANGE
+    // =========================================================
+
+    const handleChange = async (e) => {
+
+        const {
+            name,
+            value
+        } = e.target;
+
+        clearAlerts();
+
+
+        // -----------------------------------------------------
+        // MOBILE
+        // -----------------------------------------------------
+
+        if (name === 'mobile') {
+
+            const digits = value
+                .replace(/\D/g, '')
+                .slice(0, 10);
+
+            updateForm({
+                mobile: digits
+            });
 
             return;
         }
 
-        // Normal input update
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
 
-        // Pincode ke 6 digits complete hone par city/state fetch karo
-        if (name === 'pincode' && value.length === 6) {
+        // -----------------------------------------------------
+        // PINCODE
+        // -----------------------------------------------------
 
-            try {
+        if (name === 'pincode') {
 
-                setLocationLoading(true);
+            const digits = value
+                .replace(/\D/g, '')
+                .slice(0, 6);
 
-                const response = await fetch(
-                    `https://api.postalpincode.in/pincode/${value}`
+            updateForm({
+
+                pincode: digits,
+
+                city: '',
+                state: '',
+
+                latitude: '',
+                longitude: ''
+            });
+
+
+            if (digits.length === 6) {
+
+                await fetchPincodeDetails(
+                    digits
                 );
-
-                const data = await response.json();
-
-                if (
-                    data[0]?.Status === 'Success' &&
-                    data[0]?.PostOffice?.length > 0
-                ) {
-
-                    const postOffice = data[0].PostOffice[0];
-
-                    setFormData((prev) => ({
-                        ...prev,
-                        pincode: value,
-                        city: postOffice.District || '',
-                        state: postOffice.State || ''
-                    }));
-
-                } else {
-
-                    setFormData((prev) => ({
-                        ...prev,
-                        city: '',
-                        state: ''
-                    }));
-
-                    setError('Invalid pincode.');
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    'Pincode API error:',
-                    error
-                );
-
-                setError(
-                    'Unable to fetch city and state from pincode.'
-                );
-
-            } finally {
-
-                setLocationLoading(false);
             }
+
+            return;
         }
+
+
+        // -----------------------------------------------------
+        // ADDRESS
+        // -----------------------------------------------------
+
+        if (name === 'address') {
+
+            updateForm({
+
+                address: value,
+
+                // Address change hua hai,
+                // isliye old coordinates invalid hain.
+
+                latitude: '',
+                longitude: ''
+            });
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // NORMAL FIELD
+        // -----------------------------------------------------
+
+        updateForm({
+            [name]: value
+        });
     };
 
 
-    // Get location from entered address
+    // =========================================================
+    // FETCH PINCODE DETAILS
+    // =========================================================
+
+    const fetchPincodeDetails = async (pincode) => {
+
+        try {
+
+            setPincodeLoading(true);
+
+            setError('');
+            setMessage('');
+
+
+            const response = await fetch(
+                `https://api.postalpincode.in/pincode/${pincode}`
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'Unable to verify pincode.'
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                data?.[0]?.Status !== 'Success' ||
+                !data?.[0]?.PostOffice?.length
+            ) {
+
+                updateForm({
+
+                    city: '',
+                    state: '',
+
+                    latitude: '',
+                    longitude: ''
+                });
+
+
+                setError(
+                    'Invalid pincode. Please enter a valid Indian pincode.'
+                );
+
+                return;
+            }
+
+
+            const postOffice =
+                data[0].PostOffice[0];
+
+
+            updateForm({
+
+                city:
+                    postOffice?.District || '',
+
+                state:
+                    postOffice?.State || '',
+
+                latitude: '',
+                longitude: ''
+            });
+
+
+            setMessage(
+                `Pincode verified: ${postOffice?.District || ''
+                }, ${postOffice?.State || ''
+                }`
+            );
+
+
+        } catch (err) {
+
+            console.error(
+                'Pincode API error:',
+                err
+            );
+
+
+            updateForm({
+
+                city: '',
+                state: '',
+
+                latitude: '',
+                longitude: ''
+            });
+
+
+            setError(
+                err?.message ||
+                'Unable to fetch city and state from pincode.'
+            );
+
+
+        } finally {
+
+            setPincodeLoading(false);
+        }
+    };
+
+    // FIND LOCATION BY ADDRESS
+
     const getAddressLocation = async () => {
-        setError('');
-        setMessage('');
+
+        clearAlerts();
 
         if (!formData.address.trim()) {
             setError('Please enter shop address.');
@@ -140,182 +311,627 @@ export default function RegisterStoresPage() {
             return;
         }
 
-        if (!/^[0-9]{6}$/.test(formData.pincode)) {
-            setError('Please enter valid 6 digit pincode.');
+        if (!/^\d{6}$/.test(formData.pincode)) {
+            setError('Please enter a valid 6 digit pincode.');
             return;
         }
 
-        const token = localStorage.getItem('accessToken');
-
-        if (!token) {
-            router.replace('/login?redirect=/admin/stores/register');
-            return;
-        }
-
-        const fullAddress = [
-            formData.address.trim(),
-            formData.city.trim(),
-            formData.state.trim(),
-            formData.pincode,
-            'India'
-        ].join(', ');
+        setAddressLoading(true);
 
         try {
-            setLocationLoading(true);
 
-            const response = await fetch(
-                `${API_URL}/admin/stores/geocode?address=${encodeURIComponent(fullAddress)}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        Accept: 'application/json'
+            const address = formData.address.trim();
+            const city = formData.city.trim();
+            const state = formData.state.trim();
+            const pincode = formData.pincode.trim();
+
+            /*
+             * Multiple search queries.
+             *
+             * Agar pehla exact address fail ho,
+             * to next simpler query try hogi.
+             */
+
+            const queries = [
+
+                // 1. Full address
+                `${address}, ${city}, ${state}, ${pincode}, India`,
+
+                // 2. Address + city + pincode
+                `${address}, ${city}, ${pincode}, India`,
+
+                // 3. Address + city + state
+                `${address}, ${city}, ${state}, India`,
+
+                // 4. Address + city
+                `${address}, ${city}, India`,
+
+                // 5. City + pincode
+                `${city}, ${pincode}, India`
+
+            ];
+
+
+            let foundLocation = null;
+
+
+            for (const query of queries) {
+
+                console.log(
+                    'Nominatim searching:',
+                    query
+                );
+
+
+                const url =
+                    'https://nominatim.openstreetmap.org/search?' +
+                    new URLSearchParams({
+
+                        format: 'jsonv2',
+
+                        q: query,
+
+                        limit: '1',
+
+                        countrycodes: 'in',
+
+                        addressdetails: '1',
+
+                        'accept-language': 'en'
+
+                    }).toString();
+
+
+                const response = await fetch(
+                    url,
+                    {
+                        method: 'GET',
+
+                        headers: {
+                            Accept:
+                                'application/json'
+                        }
                     }
+                );
+
+
+                if (!response.ok) {
+                    continue;
                 }
+
+
+                const results =
+                    await response.json();
+
+
+                if (
+                    Array.isArray(results) &&
+                    results.length > 0
+                ) {
+
+                    foundLocation =
+                        results[0];
+
+                    console.log(
+                        'Nominatim result:',
+                        foundLocation
+                    );
+
+                    break;
+                }
+
+
+                /*
+                 * Public Nominatim service ke against
+                 * rapid multiple requests mat bhejna.
+                 */
+
+                await new Promise(
+                    resolve =>
+                        setTimeout(resolve, 1100)
+                );
+            }
+
+
+            if (!foundLocation) {
+
+                setError(
+                    'Location could not be found. Please add a nearby landmark or road name.'
+                );
+
+                return;
+            }
+
+
+            const latitude =
+                foundLocation.lat;
+
+            const longitude =
+                foundLocation.lon;
+
+
+            if (!latitude || !longitude) {
+
+                setError(
+                    'Location coordinates were not found.'
+                );
+
+                return;
+            }
+
+
+            updateForm({
+
+                latitude:
+                    String(latitude),
+
+                longitude:
+                    String(longitude)
+            });
+
+
+            setMessage(
+                `Location found successfully: ${Number(latitude).toFixed(6)
+                }, ${Number(longitude).toFixed(6)
+                }`
             );
 
-            const result = await response.json();
 
-            if (!response.ok) {
-                throw new Error(
-                    result?.message || 'Unable to find location.'
-                );
-            }
+        } catch (err) {
 
-            if (
-                !result?.success ||
-                !result?.data ||
-                result.data.latitude == null ||
-                result.data.longitude == null
-            ) {
-                throw new Error(
-                    result?.message || 'Location not found.'
-                );
-            }
-
-            setFormData((prev) => ({
-                ...prev,
-                latitude: String(result.data.latitude),
-                longitude: String(result.data.longitude)
-            }));
-
-            setMessage('Location found successfully.');
-
-        } catch (error) {
-            console.error('Address location error:', error);
+            console.error(
+                'Nominatim error:',
+                err
+            );
 
             setError(
-                error?.message || 'Unable to find location.'
+                'Unable to find location from address. Please try Current GPS.'
             );
 
-            setFormData((prev) => ({
-                ...prev,
-                latitude: '',
-                longitude: ''
-            }));
-
         } finally {
-            setLocationLoading(false);
+
+            setAddressLoading(false);
         }
     };
 
-    // Register store
+
+    // =========================================================
+    // GET CURRENT GPS LOCATION
+    // =========================================================
+
+    const getCurrentLocation = () => {
+
+        clearAlerts();
+
+
+        if (!navigator.geolocation) {
+
+            setError(
+                'Your browser does not support location detection.'
+            );
+
+            return;
+        }
+
+
+        setGpsLoading(true);
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            (position) => {
+
+                const {
+                    latitude,
+                    longitude
+                } = position.coords;
+
+
+                updateForm({
+
+                    latitude:
+                        String(latitude),
+
+                    longitude:
+                        String(longitude)
+                });
+
+
+                setMessage(
+                    `Current GPS location detected: ${latitude.toFixed(6)
+                    }, ${longitude.toFixed(6)
+                    }`
+                );
+
+
+                setGpsLoading(false);
+            },
+
+
+            (geoError) => {
+
+                console.error(
+                    'GPS error:',
+                    geoError
+                );
+
+
+                let errorMessage =
+                    'Unable to get your current location.';
+
+
+                if (
+                    geoError.code === 1
+                ) {
+
+                    errorMessage =
+                        'Location permission denied. Please allow location access in your browser.';
+                }
+
+
+                if (
+                    geoError.code === 2
+                ) {
+
+                    errorMessage =
+                        'Current location is unavailable. Please try again.';
+                }
+
+
+                if (
+                    geoError.code === 3
+                ) {
+
+                    errorMessage =
+                        'Location request timed out. Please try again.';
+                }
+
+
+                setError(
+                    errorMessage
+                );
+
+
+                setGpsLoading(false);
+            },
+
+
+            {
+
+                enableHighAccuracy: true,
+
+                timeout: 15000,
+
+                maximumAge: 0
+            }
+        );
+    };
+
+
+    // =========================================================
+    // CLEAR LOCATION
+    // =========================================================
+
+    const clearLocation = () => {
+
+        updateForm({
+
+            latitude: '',
+            longitude: ''
+        });
+
+
+        setError('');
+
+        setMessage(
+            'Shop location cleared. Please select the location again.'
+        );
+    };
+
+
+    // =========================================================
+    // REGISTER STORE
+    // =========================================================
+
     const handleSubmit = async (e) => {
 
         e.preventDefault();
 
-        setError('');
-        setMessage('');
+        clearAlerts();
 
-        const token = localStorage.getItem('accessToken');
 
-        if (!token) {
-            router.replace(
-                '/login?redirect=/admin/stores/register'
-            );
-            return;
-        }
+        // -----------------------------------------------------
+        // SHOP NAME
+        // -----------------------------------------------------
 
         if (!formData.shopName.trim()) {
-            setError('Please enter shop name.');
+
+            setError(
+                'Please enter shop name.'
+            );
+
             return;
         }
 
-        if (!formData.address.trim()) {
-            setError('Please enter shop address.');
+
+        // -----------------------------------------------------
+        // SHOPKEEPER NAME
+        // -----------------------------------------------------
+
+        if (
+            !formData.shopkeeperName.trim()
+        ) {
+
+            setError(
+                'Please enter shopkeeper name.'
+            );
+
             return;
         }
 
-        if (!formData.city.trim()) {
-            setError('Please enter city.');
+
+        // -----------------------------------------------------
+        // MOBILE
+        // -----------------------------------------------------
+
+        if (
+            !/^\d{10}$/.test(
+                formData.mobile
+            )
+        ) {
+
+            setError(
+                'Please enter a valid 10 digit mobile number.'
+            );
+
             return;
         }
 
-        if (!formData.state.trim()) {
-            setError('Please enter state.');
+
+        // -----------------------------------------------------
+        // EMAIL
+        // -----------------------------------------------------
+
+        if (
+            formData.email.trim() &&
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                formData.email.trim()
+            )
+        ) {
+
+            setError(
+                'Please enter a valid email address.'
+            );
+
             return;
         }
 
-        if (!/^[0-9]{6}$/.test(formData.pincode)) {
-            setError('Please enter valid 6 digit pincode.');
+
+        // -----------------------------------------------------
+        // COUNTRY
+        // -----------------------------------------------------
+
+        if (
+            !formData.country.trim()
+        ) {
+
+            setError(
+                'Please select country.'
+            );
+
             return;
         }
 
-        if (!formData.latitude || !formData.longitude) {
-            setError('Please get shop location first.');
+
+        // -----------------------------------------------------
+        // ADDRESS
+        // -----------------------------------------------------
+
+        if (
+            !formData.address.trim()
+        ) {
+
+            setError(
+                'Please enter shop address.'
+            );
+
             return;
         }
+
+
+        // -----------------------------------------------------
+        // CITY
+        // -----------------------------------------------------
+
+        if (
+            !formData.city.trim()
+        ) {
+
+            setError(
+                'Please enter city.'
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // STATE
+        // -----------------------------------------------------
+
+        if (
+            !formData.state.trim()
+        ) {
+
+            setError(
+                'Please enter state.'
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // PINCODE
+        // -----------------------------------------------------
+
+        if (
+            !/^\d{6}$/.test(
+                formData.pincode
+            )
+        ) {
+
+            setError(
+                'Please enter a valid 6 digit pincode.'
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // LATITUDE / LONGITUDE
+        // -----------------------------------------------------
+
+        if (
+            !formData.latitude ||
+            !formData.longitude
+        ) {
+
+            setError(
+                'Please use "Find by Address" or "Use Current GPS" before registering.'
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // API URL
+        // -----------------------------------------------------
+
+        if (!API_URL) {
+
+            setError(
+                'API URL is not configured. Please check NEXT_PUBLIC_API_URL.'
+            );
+
+            return;
+        }
+
 
         try {
 
             setLoading(true);
 
-            const response = await fetch(
-                `${API_URL}/admin/stores/register`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify(formData)
-                }
-            );
 
-            const result = await response.json();
+            // -------------------------------------------------
+            // BACKEND REQUEST
+            // -------------------------------------------------
 
-            if (!response.ok || !result.success) {
+            const response =
+                await apiFetch(
+                    `${API_URL}/admin/register`,
+                    {
+
+                        method: 'POST',
+
+                        headers: {
+
+                            'Content-Type':
+                                'application/json',
+
+                            Accept:
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify(
+                                formData
+                            )
+                    }
+                );
+
+
+            let result = {};
+
+
+            try {
+
+                result =
+                    await response.json();
+
+            } catch {
+
+                result = {};
+            }
+
+
+            // -------------------------------------------------
+            // RESPONSE ERROR
+            // -------------------------------------------------
+
+            if (
+                !response.ok ||
+                !result?.success
+            ) {
+
                 throw new Error(
-                    result.message ||
+
+                    result?.message ||
+
+                    result?.error ||
+
                     'Store registration failed.'
                 );
             }
 
+
+            // -------------------------------------------------
+            // SUCCESS
+            // -------------------------------------------------
+
             setMessage(
-                'Store registered successfully.'
+                'Store and shopkeeper registered successfully.'
             );
 
+
+            // -------------------------------------------------
+            // RESET FORM
+            // -------------------------------------------------
+
             setFormData({
+
                 shopName: '',
+                shopkeeperName: '',
+                mobile: '',
+                email: '',
+
+                country: 'India',
+
                 address: '',
                 city: '',
                 state: '',
                 pincode: '',
+
                 latitude: '',
                 longitude: ''
             });
 
-        } catch (error) {
+
+        } catch (err) {
 
             console.error(
                 'Store registration error:',
-                error
+                err
             );
 
+
             setError(
-                error.message ||
-                'Something went wrong.'
+                err?.message ||
+                'Something went wrong while registering the store.'
             );
+
 
         } finally {
 
@@ -324,52 +940,46 @@ export default function RegisterStoresPage() {
     };
 
     return (
+
         <div className="min-h-screen bg-[#f7f7f5] text-[#292628]">
 
             <AdminSidebar />
 
             <main className="lg:ml-[255px] min-h-screen">
 
-                {/* Header */}
-                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center justify-between">
+                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center">
 
-                    <div>
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        disabled={loading}
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-[#6f676a] transition hover:bg-[#f5f1f2] disabled:opacity-50"
+                    >
+
+                        <ArrowLeft size={21} />
+
+                    </button>
+
+
+                    <div className="ml-3">
 
                         <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">
                             Store Management
                         </p>
 
-                        <div className="flex items-center gap-3 mt-1">
+                        <h1 className="text-xl font-semibold mt-1">
+                            Register Store
+                        </h1>
 
-                            <button
-                                onClick={() =>
-                                    router.push('/admin/stores')
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-full text-[#6f676a] transition hover:bg-[#f5f1f2]"
-                                aria-label="Back to Store Management"
-                            >
-                                <span className="material-symbols-outlined text-[22px]">
-                                    arrow_back
-                                </span>
-                            </button>
-
-                            <h1 className="text-xl font-semibold">
-                                Register Store
-                            </h1>
-
-                        </div>
-
-                    </div>
-
-                    <div className="w-10 h-10 rounded-xl bg-[#e7dce1] text-[#6d5260] flex items-center justify-center font-bold">
-                        A
                     </div>
 
                 </header>
 
                 <div className="p-5 sm:p-8">
 
-                    {/* Page heading */}
+
+                    {/* PAGE TITLE */}
+
                     <div className="mb-8">
 
                         <p className="text-sm text-[#8a8385]">
@@ -381,411 +991,802 @@ export default function RegisterStoresPage() {
                         </h2>
 
                         <p className="mt-2 text-sm text-[#8a8385] max-w-2xl">
-                            Add a new store by providing its basic
-                            information, address and exact location.
+                            Add store and shopkeeper details with the exact shop location.
                         </p>
 
                     </div>
 
-                    {/* Registration form */}
-                    <div className="bg-white rounded-2xl shadow-[4px_4px_14px_rgba(0,0,0,0.04),-4px_-4px_14px_rgba(255,255,255,0.8)] overflow-hidden">
 
-                        {/* Form header */}
-                        <div className="px-6 py-6 sm:px-8 border-b border-[#f0eded]">
+                    {/* FORM */}
 
-                            <div className="flex items-center gap-4">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="bg-white rounded-2xl shadow-[4px_4px_14px_rgba(0,0,0,0.04),-4px_-4px_14px_rgba(255,255,255,0.8)] overflow-hidden"
+                    >
 
-                                <div className="w-12 h-12 rounded-xl bg-[#eee5e9] text-[#694f5c] flex items-center justify-center">
-                                    <Store size={22} />
-                                </div>
 
-                                <div>
+                        <div className="p-6 sm:p-8 space-y-8">
 
-                                    <h3 className="text-lg font-semibold text-[#292628]">
-                                        Store Information
-                                    </h3>
 
-                                    <p className="text-sm text-[#8a8385] mt-1">
-                                        Enter the details below to register a new store.
-                                    </p>
+                            {/* SHOPKEEPER*/}
 
-                                </div>
+                            <section>
 
-                            </div>
+                                <SectionHeader
+                                    icon="👤"
+                                    title="Shopkeeper Information"
+                                    subtitle="Owner or shopkeeper contact details"
+                                />
 
-                        </div>
-
-                        <form
-                            onSubmit={handleSubmit}
-                            className="p-6 sm:p-8"
-                        >
-
-                            {/* Basic information */}
-                            <div>
-
-                                <div className="flex items-center gap-2 mb-5">
-
-                                    <Building2
-                                        size={18}
-                                        className="text-[#6d5260]"
-                                    />
-
-                                    <div>
-
-                                        <h4 className="text-sm font-semibold text-[#292628]">
-                                            Basic Information
-                                        </h4>
-
-                                        <p className="text-xs text-[#9a9295] mt-0.5">
-                                            Basic details of the store
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                                {/* Shop name */}
-                                <div>
-
-                                    <label
-                                        htmlFor="shopName"
-                                        className="block text-sm font-semibold text-[#514b4e] mb-2"
-                                    >
-                                        Shop Name
-                                        <span className="text-red-500 ml-1">
-                                            *
-                                        </span>
-                                    </label>
-
-                                    <input
-                                        id="shopName"
-                                        type="text"
-                                        name="shopName"
-                                        value={formData.shopName}
-                                        onChange={handleChange}
-                                        placeholder="Enter shop name"
-                                        required
-                                        className="w-full h-12 rounded-xl border border-[#e6e1e3] bg-white px-4 text-sm text-[#292628] placeholder:text-[#b0a9ac] outline-none transition focus:border-[#9b7b89] focus:ring-2 focus:ring-[#eee5e9]"
-                                    />
-
-                                </div>
-
-                                {/* Address */}
-                                <div className="mt-5">
-
-                                    <label
-                                        htmlFor="address"
-                                        className="block text-sm font-semibold text-[#514b4e] mb-2"
-                                    >
-                                        Shop Address
-                                        <span className="text-red-500 ml-1">
-                                            *
-                                        </span>
-                                    </label>
-
-                                    <textarea
-                                        id="address"
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleChange}
-                                        placeholder="Enter complete shop address"
-                                        rows={4}
-                                        required
-                                        className="w-full rounded-xl border border-[#e6e1e3] bg-white px-4 py-3 text-sm text-[#292628] placeholder:text-[#b0a9ac] outline-none resize-none transition focus:border-[#9b7b89] focus:ring-2 focus:ring-[#eee5e9]"
-                                    />
-
-                                </div>
-
-                            </div>
-
-                            <div className="my-8 border-t border-[#f0eded]" />
-
-                            {/* Address details */}
-                            <div>
-
-                                <div className="flex items-center gap-2 mb-5">
-
-                                    <MapPin
-                                        size={18}
-                                        className="text-[#6d5260]"
-                                    />
-
-                                    <div>
-
-                                        <h4 className="text-sm font-semibold text-[#292628]">
-                                            Address Details
-                                        </h4>
-
-                                        <p className="text-xs text-[#9a9295] mt-0.5">
-                                            Location information of the store
-                                        </p>
-
-                                    </div>
-
-                                </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                                    {/* City */}
-                                    <div>
 
-                                        <label
-                                            htmlFor="city"
-                                            className="block text-sm font-semibold text-[#514b4e] mb-2"
-                                        >
-                                            City
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </label>
-
-                                        <input
-                                            id="city"
-                                            type="text"
-                                            name="city"
-                                            value={formData.city}
-                                            onChange={handleChange}
-                                            placeholder="Enter pincode, and city will appear automatically."
-                                            required
-                                            className="w-full h-12 rounded-xl border border-[#e6e1e3] bg-white px-4 text-sm outline-none transition focus:border-[#9b7b89] focus:ring-2 focus:ring-[#eee5e9]"
-                                        />
-
-                                    </div>
-
-                                    {/* State */}
-                                    <div>
-
-                                        <label
-                                            htmlFor="state"
-                                            className="block text-sm font-semibold text-[#514b4e] mb-2"
-                                        >
-                                            State
-                                            <span className="text-red-500 ml-1">
-                                                *
-                                            </span>
-                                        </label>
-
-                                        <input
-                                            id="state"
-                                            type="text"
-                                            name="state"
-                                            value={formData.state}
-                                            onChange={handleChange}
-                                            placeholder="Enter pincode, and state will appear automatically."
-                                            required
-                                            className="w-full h-12 rounded-xl border border-[#e6e1e3] bg-white px-4 text-sm outline-none transition focus:border-[#9b7b89] focus:ring-2 focus:ring-[#eee5e9]"
-                                        />
-
-                                    </div>
-
-                                </div>
-
-                                {/* Pincode */}
-                                <div className="mt-5 md:w-1/2">
-
-                                    <label
-                                        htmlFor="pincode"
-                                        className="block text-sm font-semibold text-[#514b4e] mb-2"
-                                    >
-                                        Pincode
-                                        <span className="text-red-500 ml-1">
-                                            *
-                                        </span>
-                                    </label>
-
-                                    <input
-                                        id="pincode"
-                                        type="text"
-                                        name="pincode"
-                                        value={formData.pincode}
-                                        onChange={handleChange}
-                                        placeholder="Enter 6 digit pincode"
-                                        maxLength={6}
-                                        inputMode="numeric"
-                                        pattern="[0-9]{6}"
+                                    <InputField
+                                        icon={
+                                            <User size={17} />
+                                        }
+                                        label="Shopkeeper Name"
+                                        name="shopkeeperName"
+                                        value={
+                                            formData.shopkeeperName
+                                        }
+                                        onChange={
+                                            handleChange
+                                        }
+                                        placeholder="Enter shopkeeper name"
                                         required
-                                        className="w-full h-12 rounded-xl border border-[#e6e1e3] bg-white px-4 text-sm outline-none transition focus:border-[#9b7b89] focus:ring-2 focus:ring-[#eee5e9]"
+                                        disabled={
+                                            loading
+                                        }
+                                    />
+
+
+                                    <InputField
+                                        icon={
+                                            <Phone size={17} />
+                                        }
+                                        label="Mobile Number"
+                                        name="mobile"
+                                        type="tel"
+                                        value={
+                                            formData.mobile
+                                        }
+                                        onChange={
+                                            handleChange
+                                        }
+                                        placeholder="Enter 10 digit mobile number"
+                                        required
+                                        disabled={
+                                            loading
+                                        }
+                                    />
+
+
+                                    <InputField
+                                        icon={
+                                            <Mail size={17} />
+                                        }
+                                        label="Email"
+                                        name="email"
+                                        type="email"
+                                        value={
+                                            formData.email
+                                        }
+                                        onChange={
+                                            handleChange
+                                        }
+                                        placeholder="Enter email address"
+                                        disabled={
+                                            loading
+                                        }
                                     />
 
                                 </div>
 
-                            </div>
+                            </section>
 
-                            <div className="my-8 border-t border-[#f0eded]" />
 
-                            {/* Shop location */}
-                            <div>
+                            {/* =================================================
+                                STORE INFORMATION
+                            ================================================= */}
 
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+                            <section className="border-t border-[#f0eded] pt-8">
+
+                                <SectionHeader
+                                    icon="🏪"
+                                    title="Store Information"
+                                    subtitle="Basic store details"
+                                />
+
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+                                    <InputField
+                                        icon={
+                                            <Store size={17} />
+                                        }
+                                        label="Shop Name"
+                                        name="shopName"
+                                        value={
+                                            formData.shopName
+                                        }
+                                        onChange={
+                                            handleChange
+                                        }
+                                        placeholder="Enter shop name"
+                                        required
+                                        disabled={
+                                            loading
+                                        }
+                                    />
+
+
+                                    {/* COUNTRY */}
+
+                                    <div>
+
+                                        <label className="block text-sm font-semibold text-[#514b4e] mb-2">
+
+                                            Country
+
+                                            <span className="text-red-500 ml-1">
+                                                *
+                                            </span>
+
+                                        </label>
+
+
+                                        <div className="relative">
+
+                                            <Globe
+                                                size={17}
+                                                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#91898c] pointer-events-none"
+                                            />
+
+
+                                            <select
+                                                name="country"
+                                                value={
+                                                    formData.country
+                                                }
+                                                onChange={
+                                                    handleChange
+                                                }
+                                                disabled={
+                                                    loading
+                                                }
+                                                className="w-full h-11 rounded-xl border border-[#e4dfe1] bg-white pl-11 pr-4 text-sm outline-none focus:border-[#9b7c8a] focus:ring-2 focus:ring-[#eee5e9]"
+                                            >
+
+                                                <option value="India">
+                                                    🇮🇳 India
+                                                </option>
+
+                                                <option value="United States">
+                                                    🇺🇸 United States
+                                                </option>
+
+                                                <option value="United Kingdom">
+                                                    🇬🇧 United Kingdom
+                                                </option>
+
+                                                <option value="Canada">
+                                                    🇨🇦 Canada
+                                                </option>
+
+                                                <option value="Australia">
+                                                    🇦🇺 Australia
+                                                </option>
+
+                                                <option value="Other">
+                                                    Other
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </section>
+
+
+                            {/* =================================================
+                                ADDRESS
+                            ================================================= */}
+
+                            <section className="border-t border-[#f0eded] pt-8">
+
+                                <SectionHeader
+                                    icon="📍"
+                                    title="Store Address"
+                                    subtitle="Enter store address and select the shop location"
+                                />
+
+
+                                <div className="space-y-6">
+
+
+                                    {/* ADDRESS */}
+
+                                    <div>
+
+                                        <label className="block text-sm font-semibold text-[#514b4e] mb-2">
+
+                                            Shop Address
+
+                                            <span className="text-red-500 ml-1">
+                                                *
+                                            </span>
+
+                                        </label>
+
+
+                                        <textarea
+                                            name="address"
+                                            value={
+                                                formData.address
+                                            }
+                                            onChange={
+                                                handleChange
+                                            }
+                                            placeholder="House / Shop No., Street, Area, Landmark"
+                                            rows={3}
+                                            disabled={
+                                                loading
+                                            }
+                                            className="w-full rounded-xl border border-[#e4dfe1] bg-white px-4 py-3 text-sm outline-none resize-none focus:border-[#9b7c8a] focus:ring-2 focus:ring-[#eee5e9]"
+                                        />
+
+                                    </div>
+
+
+                                    {/* PINCODE CITY STATE */}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+
+                                        <InputField
+                                            icon={
+                                                <MapPinned size={17} />
+                                            }
+                                            label="Pincode"
+                                            name="pincode"
+                                            value={
+                                                formData.pincode
+                                            }
+                                            onChange={
+                                                handleChange
+                                            }
+                                            placeholder="6 digit pincode"
+                                            required
+                                            disabled={
+                                                loading
+                                            }
+                                        />
+
+
+                                        <InputField
+                                            icon={
+                                                <Building2 size={17} />
+                                            }
+                                            label="City"
+                                            name="city"
+                                            value={
+                                                formData.city
+                                            }
+                                            placeholder="Auto filled"
+                                            required
+                                            readOnly
+                                            disabled={
+                                                loading
+                                            }
+                                        />
+
+
+                                        <InputField
+                                            icon={
+                                                <Building2 size={17} />
+                                            }
+                                            label="State"
+                                            name="state"
+                                            value={
+                                                formData.state
+                                            }
+                                            placeholder="Auto filled"
+                                            required
+                                            readOnly
+                                            disabled={
+                                                loading
+                                            }
+                                        />
+
+                                    </div>
+
+
+                                    {/* PINCODE LOADING */}
+
+                                    {pincodeLoading && (
+
+                                        <div className="flex items-center gap-2 text-sm text-[#77636d]">
+
+                                            <Loader2
+                                                size={16}
+                                                className="animate-spin"
+                                            />
+
+                                            Finding city and state...
+
+                                        </div>
+
+                                    )}
+
+
+                                    {/* =================================================
+                                        LOCATION CARD
+                                    ================================================= */}
+
+                                    <div className="rounded-2xl border border-[#e8e1e3] bg-[#faf8f9] p-5">
+
+
+                                        {/* HEADER */}
+
+                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+
+                                            <div className="flex items-center gap-3">
+
+                                                <div className="w-11 h-11 rounded-xl bg-[#eee4e8] text-[#694f5c] flex items-center justify-center">🧭</div>
+
+
+                                                <div>
+
+                                                    <h4 className="font-semibold text-sm">
+                                                        Shop Location
+                                                    </h4>
+
+                                                    <p className="text-xs text-[#8a8385] mt-1">
+                                                        Choose location using address or current GPS
+                                                    </p>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            {/* BUTTONS */}
+
+                                            <div className="flex flex-col sm:flex-row gap-3">
+
+
+                                                {/* FIND BY ADDRESS */}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={
+                                                        getAddressLocation
+                                                    }
+                                                    disabled={
+                                                        addressLoading ||
+                                                        gpsLoading ||
+                                                        loading
+                                                    }
+                                                    className="h-11 px-5 rounded-xl border border-[#694f5c] bg-white text-[#694f5c] text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#f7f1f3] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                                                >
+
+                                                    {addressLoading ? (
+
+                                                        <>
+                                                            <Loader2
+                                                                size={17}
+                                                                className="animate-spin"
+                                                            />
+
+                                                            Finding...
+
+                                                        </>
+
+                                                    ) : (
+
+                                                        <>
+                                                            <Search
+                                                                size={17}
+                                                            />
+
+                                                            Find by Address
+                                                        </>
+
+                                                    )}
+
+                                                </button>
+
+
+                                                {/* CURRENT GPS */}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={
+                                                        getCurrentLocation
+                                                    }
+                                                    disabled={
+                                                        gpsLoading ||
+                                                        addressLoading ||
+                                                        loading
+                                                    }
+                                                    className="h-11 px-5 rounded-xl bg-[#694f5c] text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#5c4450] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                                                >
+
+                                                    {gpsLoading ? (
+
+                                                        <>
+                                                            <Loader2
+                                                                size={17}
+                                                                className="animate-spin"
+                                                            />
+
+                                                            Detecting...
+
+                                                        </>
+
+                                                    ) : (
+
+                                                        <>
+                                                            <LocateFixed
+                                                                size={17}
+                                                            />
+
+                                                            Use Current GPS
+                                                        </>
+
+                                                    )}
+
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        {/* =================================================
+                                            LOCATION RESULT
+                                        ================================================= */}
+
+                                        {formData.latitude &&
+                                            formData.longitude ? (
+
+                                            <div className="mt-5">
+
+
+                                                {/* SUCCESS */}
+
+                                                <div className="flex items-center justify-between gap-3 rounded-xl border border-[#cfe3d6] bg-[#f0f8f3] px-4 py-3">
+
+                                                    <div className="flex items-center gap-3">
+
+                                                        <div className="w-9 h-9 rounded-full bg-[#dcefe3] flex items-center justify-center">
+
+                                                            <CheckCircle2
+                                                                size={19}
+                                                                className="text-[#4f725f]"
+                                                            />
+
+                                                        </div>
+
+
+                                                        <div>
+
+                                                            <p className="text-sm font-semibold text-[#4f725f]">
+                                                                Location Selected
+                                                            </p>
+
+                                                            <p className="text-xs text-[#5d7668] mt-1">
+                                                                Latitude and longitude are ready.
+                                                            </p>
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    {/* CLEAR */}
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={
+                                                            clearLocation
+                                                        }
+                                                        disabled={
+                                                            loading
+                                                        }
+                                                        className="w-9 h-9 rounded-lg flex items-center justify-center text-[#806e75] hover:bg-white transition"
+                                                        title="Clear location"
+                                                    >
+
+                                                        <X
+                                                            size={17}
+                                                        />
+
+                                                    </button>
+
+                                                </div>
+
+
+                                                {/* COORDINATES */}
+
+                                                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+
+                                                    {/* LATITUDE */}
+
+                                                    <div className="rounded-xl bg-white border border-[#e4dfe1] p-4">
+
+                                                        <div className="flex items-center gap-2">
+
+                                                            <MapPin
+                                                                size={16}
+                                                                className="text-[#694f5c]"
+                                                            />
+
+                                                            <span className="text-xs text-[#8a8385]">
+                                                                Latitude
+                                                            </span>
+
+                                                        </div>
+
+
+                                                        <p className="mt-2 text-sm font-semibold text-[#514b4e] break-all">
+                                                            {Number(
+                                                                formData.latitude
+                                                            ).toFixed(6)}
+                                                        </p>
+
+                                                    </div>
+
+
+                                                    {/* LONGITUDE */}
+
+                                                    <div className="rounded-xl bg-white border border-[#e4dfe1] p-4">
+
+                                                        <div className="flex items-center gap-2">
+
+                                                            <MapPin
+                                                                size={16}
+                                                                className="text-[#694f5c]"
+                                                            />
+
+                                                            <span className="text-xs text-[#8a8385]">
+                                                                Longitude
+                                                            </span>
+
+                                                        </div>
+
+
+                                                        <p className="mt-2 text-sm font-semibold text-[#514b4e] break-all">
+                                                            {Number(
+                                                                formData.longitude
+                                                            ).toFixed(6)}
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        ) : (
+
+                                            /* NO LOCATION */
+
+                                            <div className="mt-5 rounded-xl border border-dashed border-[#d9cdd1] bg-white px-5 py-5">
+
+                                                <div className="flex items-start gap-3">
+
+                                                    <div className="w-9 h-9 rounded-lg bg-[#f2eaed] flex items-center justify-center shrink-0">
+
+                                                        <LocateFixed
+                                                            size={18}
+                                                            className="text-[#806e75]"
+                                                        />
+
+                                                    </div>
+
+
+                                                    <div>
+
+                                                        <p className="text-sm font-semibold text-[#5d5357]">
+                                                            Location not selected
+                                                        </p>
+
+                                                        <p className="text-xs text-[#8a8385] mt-1 leading-5">
+                                                            Fill the complete address and click
+                                                            <b> Find by Address </b>
+                                                            or use
+                                                            <b> Current GPS </b>
+                                                            to select the shop location.
+                                                        </p>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        )}
+
+
+                                        {/* =================================================
+                                            OSM ATTRIBUTION
+                                        ================================================= */}
+
+                                        <p className="mt-4 text-[11px] text-[#8a8385] text-right">
+
+                                            Location search powered by
+                                            {' '}
+
+                                            <a
+                                                href="https://www.openstreetmap.org/"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline hover:text-[#694f5c]"
+                                            >
+                                                OpenStreetMap
+                                            </a>
+
+                                            {' '}
+                                            contributors.
+
+                                        </p>
+
+                                    </div>
+
+
+                                    {/* =================================================
+                                        ERROR
+                                    ================================================= */}
+
+                                    {error && (
+
+                                        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+
+                                            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 font-bold">
+                                                !
+                                            </div>
+
+
+                                            <div>
+
+                                                <p className="text-sm font-semibold text-red-700">
+                                                    Registration Error
+                                                </p>
+
+                                                <p className="mt-1 text-sm text-red-600">
+                                                    {error}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                    )}
+
+
+                                    {/* =================================================
+                                        SUCCESS
+                                    ================================================= */}
+
+                                    {message && (
+
+                                        <div className="flex items-start gap-3 rounded-xl border border-[#d9e9df] bg-[#f0f8f3] px-4 py-3">
+
+                                            <CheckCircle2
+                                                size={19}
+                                                className="mt-0.5 shrink-0 text-[#4f725f]"
+                                            />
+
+
+                                            <div>
+
+                                                <p className="text-sm font-semibold text-[#4f725f]">
+                                                    Location Ready
+                                                </p>
+
+                                                <p className="mt-1 text-sm text-[#5d7668]">
+                                                    {message}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+                            </section>
+
+                        </div>
+
+
+                        {/* =================================================
+                            SUBMIT FOOTER
+                        ================================================= */}
+
+                        <div className="px-6 py-5 sm:px-8 border-t border-[#f0eded] bg-[#fcfbfb] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+
+                            {/* STATUS */}
+
+                            <div className="text-xs text-[#8a8385]">
+
+                                {!formData.latitude ||
+                                    !formData.longitude ? (
 
                                     <div className="flex items-center gap-2">
 
-                                        <MapPinned
-                                            size={18}
-                                            className="text-[#6d5260]"
+                                        <LocateFixed
+                                            size={15}
                                         />
 
-                                        <div>
-
-                                            <h4 className="text-sm font-semibold text-[#292628]">
-                                                Shop Location
-                                            </h4>
-
-                                            <p className="text-xs text-[#9a9295] mt-0.5">
-                                                Get the exact GPS coordinates of the store
-                                            </p>
-
-                                        </div>
+                                        Location required before registration
 
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={getAddressLocation}
-                                        disabled={locationLoading}
-                                        className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-[#6d5260] text-white text-sm font-semibold transition hover:bg-[#5b424e] disabled:opacity-60 disabled:cursor-not-allowed"
-                                    >
-                                        {locationLoading ? (
-                                            <>
-                                                <Loader2
-                                                    size={16}
-                                                    className="animate-spin"
-                                                />
-                                                Finding Location...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <MapPinned size={16} />
-                                                Get Location
-                                            </>
-                                        )}
-                                    </button>
+                                ) : (
 
-                                </div>
+                                    <div className="flex items-center gap-2 text-[#5d7668]">
 
-                                <div className="rounded-xl border border-[#e9e4e6] bg-[#faf8f9] p-5">
+                                        <CheckCircle2
+                                            size={15}
+                                        />
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                                        {/* Latitude */}
-                                        <div>
-
-                                            <label
-                                                htmlFor="latitude"
-                                                className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#9a9295] mb-2"
-                                            >
-                                                Latitude
-                                            </label>
-
-                                            <input
-                                                id="latitude"
-                                                type="text"
-                                                value={formData.latitude}
-                                                readOnly
-                                                placeholder="Not detected"
-                                                className="w-full h-11 rounded-xl border border-[#e4dfe1] bg-white px-4 text-sm text-[#706a6c] outline-none"
-                                            />
-
-                                        </div>
-
-                                        {/* Longitude */}
-                                        <div>
-
-                                            <label
-                                                htmlFor="longitude"
-                                                className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#9a9295] mb-2"
-                                            >
-                                                Longitude
-                                            </label>
-
-                                            <input
-                                                id="longitude"
-                                                type="text"
-                                                value={formData.longitude}
-                                                readOnly
-                                                placeholder="Not detected"
-                                                className="w-full h-11 rounded-xl border border-[#e4dfe1] bg-white px-4 text-sm text-[#706a6c] outline-none"
-                                            />
-
-                                        </div>
+                                        Shop location ready
 
                                     </div>
 
-                                    {formData.latitude &&
-                                        formData.longitude && (
-                                            <div className="mt-4 flex items-center gap-2 text-xs font-medium text-[#4f725f]">
-
-                                                <CheckCircle2 size={15} />
-
-                                                Shop location detected successfully.
-
-                                            </div>
-                                        )}
-
-                                </div>
+                                )}
 
                             </div>
 
-                            {/* Error */}
-                            {error && (
-                                <div className="mt-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
-                                    {error}
-                                </div>
-                            )}
 
-                            {/* Success */}
-                            {message && (
-                                <div className="mt-6 flex items-center gap-2 rounded-xl border border-[#d9e9df] bg-[#f0f8f3] px-4 py-3 text-sm text-[#4f725f]">
+                            {/* REGISTER */}
 
-                                    <CheckCircle2 size={17} />
+                            <button
+                                type="submit"
 
-                                    {message}
+                                disabled={
+                                    loading ||
+                                    gpsLoading ||
+                                    addressLoading ||
+                                    !formData.latitude ||
+                                    !formData.longitude
+                                }
 
-                                </div>
-                            )}
+                                className="h-12 px-8 rounded-xl bg-[#694f5c] text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#5c4450] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
 
-                            {/* Actions */}
-                            <div className="mt-8 pt-6 border-t border-[#f0eded] flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                                {loading && (
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        router.push('/admin/stores')
-                                    }
-                                    disabled={loading}
-                                    className="h-11 px-6 rounded-xl border border-[#ddd7d9] bg-white text-sm font-semibold text-[#625b5e] transition hover:bg-[#faf7f8] disabled:opacity-50"
-                                >
-                                    Cancel
-                                </button>
+                                    <Loader2
+                                        size={18}
+                                        className="animate-spin"
+                                    />
 
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="h-11 px-7 rounded-xl bg-[#6d5260] text-white text-sm font-semibold flex items-center justify-center gap-2 transition hover:bg-[#5b424e] disabled:opacity-60 disabled:cursor-not-allowed"
-                                >
+                                )}
 
-                                    {loading ? (
-                                        <>
-                                            <Loader2
-                                                size={17}
-                                                className="animate-spin"
-                                            />
-                                            Registering...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Store size={17} />
-                                            Register Store
-                                        </>
-                                    )}
 
-                                </button>
+                                {loading
+                                    ? 'Registering...'
+                                    : 'Register Store'}
 
-                            </div>
+                            </button>
 
-                        </form>
+                        </div>
 
-                    </div>
+                    </form>
 
                 </div>
 
@@ -795,10 +1796,145 @@ export default function RegisterStoresPage() {
     );
 }
 
-function Loading() {
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+function SectionHeader({
+    icon,
+    title,
+    subtitle
+}) {
+
     return (
-        <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center">
-            <div className="w-10 h-10 border-4 border-[#e6e1e3] border-t-[#6d5260] rounded-full animate-spin" />
+
+        <div className="flex items-center gap-3 mb-5">
+
+            <div className="w-10 h-10 rounded-xl bg-[#f2eaed] text-[#694f5c] flex items-center justify-center">
+
+                {icon}
+
+            </div>
+
+
+            <div>
+
+                <h3 className="font-semibold">
+                    {title}
+                </h3>
+
+                <p className="text-xs text-[#8a8385] mt-1">
+                    {subtitle}
+                </p>
+
+            </div>
+
+        </div>
+    );
+}
+
+
+/* =========================================================
+   INPUT FIELD
+========================================================= */
+
+function InputField({
+    icon,
+    label,
+    name,
+    value,
+    onChange,
+    placeholder,
+    type = 'text',
+    required = false,
+    readOnly = false,
+    disabled = false
+}) {
+
+    return (
+
+        <div>
+
+            <label className="block text-sm font-semibold text-[#514b4e] mb-2">
+
+                {label}
+
+                {required && (
+
+                    <span className="text-red-500 ml-1">
+                        *
+                    </span>
+
+                )}
+
+            </label>
+
+
+            <div className="relative">
+
+                {icon && (
+
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#91898c] pointer-events-none">
+
+                        {icon}
+
+                    </div>
+
+                )}
+
+
+                <input
+
+                    type={type}
+
+                    name={name}
+
+                    value={value}
+
+                    onChange={onChange}
+
+                    placeholder={placeholder}
+
+                    readOnly={readOnly}
+
+                    disabled={disabled}
+
+                    required={required}
+
+                    className={`
+
+                        w-full h-11 rounded-xl
+
+                        border border-[#e4dfe1]
+
+                        ${icon
+                            ? 'pl-11'
+                            : 'px-4'
+                        }
+
+                        pr-4
+
+                        text-sm
+
+                        outline-none
+
+                        transition
+
+                        ${readOnly
+                            ? 'bg-[#faf9f9] text-[#81797c]'
+                            : 'bg-white focus:border-[#9b7c8a] focus:ring-2 focus:ring-[#eee5e9]'
+                        }
+
+                        disabled:bg-[#f7f6f6]
+                        disabled:text-[#aaa3a5]
+                        disabled:cursor-not-allowed
+
+                    `}
+                />
+
+            </div>
+
         </div>
     );
 }

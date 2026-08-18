@@ -322,7 +322,7 @@ export default function AdminSidebar() {
                 >
 
                     <SidebarItem
-                        icon={<LayoutDashboard size={19} />}
+                        icon="🏠"
                         title="Dashboard"
                         active={isActive('/admin')}
                         onClick={() =>
@@ -332,7 +332,7 @@ export default function AdminSidebar() {
 
 
                     <SidebarItem
-                        icon={<Store size={19} />}
+                        icon="🏪"
                         title="Stores"
                         active={isActive('/admin/stores')}
                         onClick={() =>
@@ -352,7 +352,7 @@ export default function AdminSidebar() {
 
 
                     <SidebarItem
-                        icon={<Tags size={19} />}
+                        icon="🏷️"
                         title="Categories"
                         active={isActive('/admin/categories')}
                         onClick={() =>
@@ -362,7 +362,7 @@ export default function AdminSidebar() {
 
 
                     <SidebarItem
-                        icon={<Package size={19} />}
+                        icon="📦"
                         title="Products"
                         active={isActive('/admin/products')}
                         onClick={() =>
@@ -372,7 +372,7 @@ export default function AdminSidebar() {
 
 
                     <SidebarItem
-                        icon={<ShoppingCart size={19} />}
+                        icon="🛒"
                         title="Orders"
                         active={isActive('/admin/orders')}
                         onClick={() =>
@@ -382,7 +382,7 @@ export default function AdminSidebar() {
 
 
                     <SidebarItem
-                        icon={<Users size={19} />}
+                        icon="👤"
                         title="Users"
                         active={isActive('/admin/users')}
                         onClick={() =>

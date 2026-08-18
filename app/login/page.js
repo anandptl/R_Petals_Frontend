@@ -638,7 +638,7 @@ export default function LoginPage() {
 
       } else if (role === 'SHOPKEEPER') {
 
-        router.replace('/shopkeeper');
+        router.replace('/darkStore');
 
       } else if (role === 'USER') {
 

@@ -30,8 +30,9 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href={materialSymbols.url} crossOrigin="anonymous" />
       </head>
       <body className="bg-background text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
-        <AuthSessionGuard />
-        {children}
+        <AuthSessionGuard>
+          {children}
+        </AuthSessionGuard>
       </body>
     </html>
   );

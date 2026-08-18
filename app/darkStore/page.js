@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { logout } from '@/lib/auth';
 
 export default function ShopkeeperPage() {
     const router = useRouter();
@@ -35,12 +36,12 @@ export default function ShopkeeperPage() {
         setChecking(false);
     }, [router]);
 
-    const logout = () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('role');
-        localStorage.removeItem('rpetalsUser');
-
-        router.replace('/login');
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } finally {
+            router.replace('/login');
+        }
     };
 
     if (checking) {
@@ -171,7 +172,7 @@ export default function ShopkeeperPage() {
                 <div className="mt-auto p-5 border-t border-[#e8eeec]">
 
                     <button
-                        onClick={logout}
+                        onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#C74747] hover:bg-[#557f75] transition"
                     >
                         <span>↪</span>
