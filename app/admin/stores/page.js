@@ -363,21 +363,15 @@ export default function ShopAdminDashboard() {
 
                             </div>
 
-
                             <button
                                 type="button"
                                 onClick={() =>
-                                    router.push(
-                                        '/admin/stores/registered'
-                                    )
+                                    router.push('/admin/stores/all')
                                 }
                                 className="text-sm font-semibold text-[#694f5c] flex items-center gap-2 hover:gap-3 transition-all"
                             >
-
                                 View all
-
                                 <ArrowRight size={17} />
-
                             </button>
 
                         </div>
@@ -482,11 +476,7 @@ export default function ShopAdminDashboard() {
                                                             <div className="flex items-center gap-3">
 
                                                                 <div className="w-10 h-10 rounded-xl bg-[#eee5e9] text-[#694f5c] flex items-center justify-center shrink-0">
-
-                                                                    <Store
-                                                                        size={19}
-                                                                    />
-
+                                                                    🏪
                                                                 </div>
 
 

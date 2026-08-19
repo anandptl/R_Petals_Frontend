@@ -84,42 +84,66 @@ export default function AdminPage() {
         };
 
         const loadStoreStatus = async () => {
+
             try {
-                setStoreStatusLoading(true);
-                const response = await apiFetch(`${API_URL}/admin/stores`, {
-                    method: 'GET'
-                });
+
+                const response = await apiFetch(`${API_URL}/admin/stores`,
+                    {
+                        method: 'GET'
+                    }
+                );
+
 
                 if (response.status === 401) {
-                    router.replace('/login?redirect=/admin');
+                    router.replace(
+                        '/login?redirect=/admin'
+                    );
+
                     return;
                 }
 
                 const result = await response.json();
-                console.log('STORE API RESPONSE:', result);
 
-                if (!response.ok) {
-                    throw new Error(result.message || `API Error ${response.status}`);
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Failed to load stores');
                 }
 
-                // Handle various response wrappers
-                let storesList = [];
-                if (Array.isArray(result)) {
-                    storesList = result;
-                } else if (Array.isArray(result?.data)) {
-                    storesList = result.data;
+                let stores = [];
+
+                if (Array.isArray(result?.data)) {
+                    stores = result.data;
                 } else if (Array.isArray(result?.data?.stores)) {
-                    storesList = result.data.stores;
-                } else if (Array.isArray(result?.stores)) {
-                    storesList = result.stores;
+                    stores = result.data.stores;
+                } else if (Array.isArray(result)) {
+                    stores = result;
                 }
 
-                setStoreStatus(storesList);
+                const sortedStores = [...stores].sort(
+                    (a, b) => {
+                        if (a.todayActive && !b.todayActive) {
+                            return -1;
+                        }
+
+                        if (!a.todayActive && b.todayActive) {
+                            return 1;
+                        }
+
+                        return 0;
+                    }
+                );
+
+                setStoreStatus(sortedStores);
+
             } catch (error) {
+
                 console.error('STORE STATUS ERROR:', error);
+
                 setStoreStatus([]);
+
             } finally {
+
                 setStoreStatusLoading(false);
+
             }
         };
 

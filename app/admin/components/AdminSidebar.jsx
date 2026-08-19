@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { LayoutDashboard,Store, Tags, Package, ShoppingCart, Users, LogOut, Menu, X, Activity} from 'lucide-react';
+import { LogOut, Menu, X, Activity } from 'lucide-react';
 
 import { logout } from '@/lib/auth';
 
@@ -14,29 +14,76 @@ export default function AdminSidebar() {
 
     const [mobileOpen, setMobileOpen] = useState(false);
 
+    // ADMIN NAME
+    const [adminName, setAdminName] = useState('ADMIN');
+
+    // LOAD ADMIN NAME
+    useEffect(() => {
+
+        const storedUser = localStorage.getItem('rpetalsUser');
+
+        if (storedUser) {
+
+            try {
+
+                const user = JSON.parse(storedUser);
+
+                const name =
+                    user?.name ||
+                    user?.fullName ||
+                    user?.username ||
+                    'ADMIN';
+
+                setAdminName(name);
+
+            } catch (error) {
+
+                console.error(
+                    'Failed to load admin name:',
+                    error
+                );
+
+                setAdminName('ADMIN');
+            }
+
+        }
+
+    }, []);
+
+
+    // CLOSE MOBILE MENU WHEN ROUTE CHANGES
 
     useEffect(() => {
+
         setMobileOpen(false);
+
     }, [pathname]);
 
 
     // BODY SCROLL CONTROL
+
     useEffect(() => {
 
         if (mobileOpen) {
+
             document.body.style.overflow = 'hidden';
+
         } else {
+
             document.body.style.overflow = '';
+
         }
 
         return () => {
+
             document.body.style.overflow = '';
+
         };
 
     }, [mobileOpen]);
 
 
-   //LOGOUT
+    // LOGOUT
 
     const handleLogout = async () => {
 
@@ -46,14 +93,19 @@ export default function AdminSidebar() {
 
         } catch (error) {
 
-            console.error(  'Logout error:', error );
+            console.error(
+                'Logout error:',
+                error
+            );
 
         } finally {
 
             setMobileOpen(false);
 
             router.replace('/login');
+
         }
+
     };
 
 
@@ -64,26 +116,44 @@ export default function AdminSidebar() {
         router.push(path);
 
         setMobileOpen(false);
+
     };
 
 
-    /*ACTIVE MENU */
+    // ACTIVE MENU
 
     const isActive = (path) => {
 
         if (path === '/admin') {
+
             return pathname === '/admin';
+
         }
 
         return (
             pathname === path ||
             pathname.startsWith(`${path}/`)
         );
+
     };
 
 
+    // ADMIN FIRST LETTER
+
+    const adminInitial =
+        adminName &&
+        adminName !== 'ADMIN'
+            ? adminName
+                .trim()
+                .charAt(0)
+                .toUpperCase()
+            : 'A';
+
+
     return (
+
         <>
+
             {/* MOBILE HEADER */}
 
             <header
@@ -108,7 +178,9 @@ export default function AdminSidebar() {
                 <div className="flex items-center gap-3">
 
                     <button
-                        onClick={() => setMobileOpen(true)}
+                        onClick={() =>
+                            setMobileOpen(true)
+                        }
                         className="
                             w-10
                             h-10
@@ -123,18 +195,26 @@ export default function AdminSidebar() {
                         "
                         aria-label="Open menu"
                     >
+
                         <Menu size={21} />
+
                     </button>
 
 
                     <img
                         src="/logo1.png"
                         alt="R Petals"
-                        className="h-9 w-auto object-contain"
+                        className="
+                            h-9
+                            w-auto
+                            object-contain
+                        "
                     />
 
                 </div>
 
+
+                {/* MOBILE ADMIN INITIAL */}
 
                 <div
                     className="
@@ -150,7 +230,9 @@ export default function AdminSidebar() {
                         text-sm
                     "
                 >
-                    A
+
+                    {adminInitial}
+
                 </div>
 
             </header>
@@ -162,7 +244,9 @@ export default function AdminSidebar() {
 
                 <button
                     aria-label="Close menu"
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() =>
+                        setMobileOpen(false)
+                    }
                     className="
                         lg:hidden
                         fixed
@@ -197,12 +281,14 @@ export default function AdminSidebar() {
 
                     lg:translate-x-0
 
-                    ${mobileOpen
-                        ? 'translate-x-0'
-                        : '-translate-x-full'
+                    ${
+                        mobileOpen
+                            ? 'translate-x-0'
+                            : '-translate-x-full'
                     }
                 `}
             >
+
 
                 {/* LOGO */}
 
@@ -221,14 +307,20 @@ export default function AdminSidebar() {
                     <img
                         src="/logo1.png"
                         alt="R Petals"
-                        className="h-12 w-auto object-contain"
+                        className="
+                            h-12
+                            w-auto
+                            object-contain
+                        "
                     />
 
 
                     {/* MOBILE CLOSE */}
 
                     <button
-                        onClick={() => setMobileOpen(false)}
+                        onClick={() =>
+                            setMobileOpen(false)
+                        }
                         className="
                             lg:hidden
                             w-9
@@ -243,7 +335,9 @@ export default function AdminSidebar() {
                             transition
                         "
                     >
+
                         <X size={19} />
+
                     </button>
 
                 </div>
@@ -263,6 +357,8 @@ export default function AdminSidebar() {
 
                         <div className="flex items-center gap-3">
 
+                            {/* ADMIN AVATAR */}
+
                             <div
                                 className="
                                     w-11
@@ -276,9 +372,13 @@ export default function AdminSidebar() {
                                     font-bold
                                 "
                             >
-                                A
+
+                                {adminInitial}
+
                             </div>
 
+
+                            {/* ADMIN NAME */}
 
                             <div className="min-w-0">
 
@@ -289,8 +389,11 @@ export default function AdminSidebar() {
                                         truncate
                                     "
                                 >
-                                    Administrator
+
+                                    {adminName}
+
                                 </p>
+
 
                                 <p
                                     className="
@@ -299,7 +402,9 @@ export default function AdminSidebar() {
                                         mt-1
                                     "
                                 >
+
                                     ADMIN
+
                                 </p>
 
                             </div>
@@ -309,6 +414,7 @@ export default function AdminSidebar() {
                     </div>
 
                 </div>
+
 
                 {/* NAVIGATION */}
 
@@ -334,7 +440,9 @@ export default function AdminSidebar() {
                     <SidebarItem
                         icon="🏪"
                         title="Stores"
-                        active={isActive('/admin/stores')}
+                        active={isActive(
+                            '/admin/stores'
+                        )}
                         onClick={() =>
                             navigate('/admin/stores')
                         }
@@ -342,11 +450,17 @@ export default function AdminSidebar() {
 
 
                     <SidebarItem
-                        icon={<Activity size={19} />}
+                        icon={
+                            <Activity size={19} />
+                        }
                         title="Active Stores"
-                        active={isActive('/admin/active-stores')}
+                        active={isActive(
+                            '/admin/active-stores'
+                        )}
                         onClick={() =>
-                            navigate('/admin/active-stores')
+                            navigate(
+                                '/admin/active-stores'
+                            )
                         }
                     />
 
@@ -354,9 +468,13 @@ export default function AdminSidebar() {
                     <SidebarItem
                         icon="🏷️"
                         title="Categories"
-                        active={isActive('/admin/categories')}
+                        active={isActive(
+                            '/admin/categories'
+                        )}
                         onClick={() =>
-                            navigate('/admin/categories')
+                            navigate(
+                                '/admin/categories'
+                            )
                         }
                     />
 
@@ -364,9 +482,13 @@ export default function AdminSidebar() {
                     <SidebarItem
                         icon="📦"
                         title="Products"
-                        active={isActive('/admin/products')}
+                        active={isActive(
+                            '/admin/products'
+                        )}
                         onClick={() =>
-                            navigate('/admin/products')
+                            navigate(
+                                '/admin/products'
+                            )
                         }
                     />
 
@@ -374,9 +496,13 @@ export default function AdminSidebar() {
                     <SidebarItem
                         icon="🛒"
                         title="Orders"
-                        active={isActive('/admin/orders')}
+                        active={isActive(
+                            '/admin/orders'
+                        )}
                         onClick={() =>
-                            navigate('/admin/orders')
+                            navigate(
+                                '/admin/orders'
+                            )
                         }
                     />
 
@@ -384,13 +510,18 @@ export default function AdminSidebar() {
                     <SidebarItem
                         icon="👤"
                         title="Users"
-                        active={isActive('/admin/users')}
+                        active={isActive(
+                            '/admin/users'
+                        )}
                         onClick={() =>
-                            navigate('/admin/users')
+                            navigate(
+                                '/admin/users'
+                            )
                         }
                     />
 
                 </nav>
+
 
                 {/* LOGOUT */}
 
@@ -429,8 +560,11 @@ export default function AdminSidebar() {
                 </div>
 
             </aside>
+
         </>
+
     );
+
 }
 
 
@@ -463,9 +597,10 @@ function SidebarItem({
                 font-medium
                 transition
 
-                ${active
-                    ? 'bg-[#eee5e9] text-[#694f5c]'
-                    : 'text-[#706a6c] hover:bg-[#faf7f8] hover:text-[#694f5c]'
+                ${
+                    active
+                        ? 'bg-[#eee5e9] text-[#694f5c]'
+                        : 'text-[#706a6c] hover:bg-[#faf7f8] hover:text-[#694f5c]'
                 }
             `}
         >
@@ -478,14 +613,20 @@ function SidebarItem({
                     shrink-0
                 "
             >
+
                 {icon}
+
             </span>
 
 
             <span>
+
                 {title}
+
             </span>
 
         </button>
+
     );
+
 }

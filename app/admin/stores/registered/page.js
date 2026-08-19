@@ -947,32 +947,18 @@ export default function RegisterStoresPage() {
 
             <main className="lg:ml-[255px] min-h-screen">
 
-                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center">
-
+                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center justify-between sticky top-0 z-10">
+                    <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Store Management</p>
+                        <h1 className="text-xl font-semibold mt-1">Register Store</h1>
+                    </div>
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        disabled={loading}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-[#6f676a] transition hover:bg-[#f5f1f2] disabled:opacity-50"
+                        className="px-4 py-2 rounded-xl bg-[#faf7f8] text-[#6d5260] font-semibold text-xs border border-[#eee9ea] hover:bg-[#f2eaed] transition"
                     >
-
-                        <ArrowLeft size={21} />
-
+                        ← Back to Stores
                     </button>
-
-
-                    <div className="ml-3">
-
-                        <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">
-                            Store Management
-                        </p>
-
-                        <h1 className="text-xl font-semibold mt-1">
-                            Register Store
-                        </h1>
-
-                    </div>
-
                 </header>
 
                 <div className="p-5 sm:p-8">
