@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "./context/AuthContext";
 
 // API: GET /api/categories — fetch all categories with name, icon, sub-items
 const categories = [
