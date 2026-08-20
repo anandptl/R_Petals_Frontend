@@ -1,6 +1,7 @@
 "use client";
 import CategoryPage from "../../components/CategoryPage";
 
+
 const flowersData = {
   name: "Flowers",
   activeNavItem: "Flowers",
