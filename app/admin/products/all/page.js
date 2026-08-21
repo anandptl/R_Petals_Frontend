@@ -194,10 +194,9 @@ export default function AllProductsPage() {
                     </div>
                 </header>
 
-                <div className="p-5 sm:p-8">
+                <div className="p-5 sm:p-8" style={{ paddingTop: '10px' }}>
                     <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
                         <div>
-                            <p className="text-sm text-[#8a8385]">Inventory Dashboard</p>
                             <h2 className="text-3xl font-bold mt-1">Product Catalog</h2>
                             <p className="text-sm text-[#8a8385] mt-2">
                                 View, search, update and delete products across all categories.

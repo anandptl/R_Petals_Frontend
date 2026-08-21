@@ -230,10 +230,9 @@ export default function AddProductPage() {
                     </button>
                 </header>
 
-                <div className="p-5 sm:p-8 max-w-[1200px]">
+                <div className="p-5 sm:p-8 max-w-[1200px]" style={{ paddingTop: '10px' }}>
 
                     <div className="mt-1">
-                        <p className="text-sm text-[#8a8385]">Product Management</p>
                         <h2 className="text-3xl font-bold mt-1">Create New Product</h2>
                         <p className="text-sm text-[#8a8385] mt-2">
                             Enter product category, subcategory, details and images.

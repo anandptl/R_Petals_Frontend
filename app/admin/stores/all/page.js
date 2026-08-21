@@ -129,7 +129,7 @@ export default function RegisteredStoresPage() {
                     </button>
                 </header>
 
-                <div className="p-5 sm:p-8">
+                <div className="p-5 sm:p-8" style={{ paddingTop: '10px' }}>
                     {/* Search Field & Stats */}
                     <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-[4px_4px_14px_rgba(0,0,0,0.04),-4px_-4px_14px_rgba(255,255,255,0.8)] mb-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
                         <div className="relative w-full sm:max-w-md">

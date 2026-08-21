@@ -829,22 +829,12 @@ export default function UpdateProductPage() {
                         p-5
                         sm:p-8
                         max-w-[1100px]
-                    "
+                    " style={{ paddingTop: '10px' }}
                 >
 
                     {/* TITLE */}
 
                     <div>
-
-                        <p
-                            className="
-                                text-sm
-                                text-[#8a8385]
-                            "
-                        >
-                            Product Management
-                        </p>
-
 
                         <h2
                             className="

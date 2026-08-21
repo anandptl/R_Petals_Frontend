@@ -1,0 +1,1074 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import Link from "next/link";
+// import { useRouter } from "next/navigation";
+
+// // API: GET /api/categories/birthday/products — fetch Birthday products
+// const birthdayProducts = [
+//   {
+//     title: "Rainbow Delight Cake",
+//     description: "1 kg vanilla layered rainbow cake",
+//     price: "₹899",
+//     rating: "4.8 (1.8k)",
+//     badge: "Top Rated",
+//     image:
+//       "https://lh3.googleusercontent.com/aida-public/AB6AXuBsUMTiUIlK-BvyqTudaF3hCC4vuJdtAgtiZ_SAkgSdaEEQ6ArCeGIbBfrrYH8gwcaTznkii6gY_VnzBLgkt4ffcq1M-Q_EdGOpoKEsy-R8SI4oxV-df5stGgyXWXDmRHOt2g_iRABA52ixyOTBFXvWC4fH5NPmHEQS3ZY26AmZLvoMe1C5Xuo5tJMTIQJvmwNVP-5V7zmGIsPEu-30NkIPLTcUt9BHIBURXvtEcS6adjFsehWpTfF38g",
+//   },
+//   {
+//     title: "Balloon & Cake Combo",
+//     description: "Birthday cake with 20 balloons",
+//     price: "₹1,199",
+//     rating: "4.7 (950)",
+//     badge: "Same Day",
+//     image:
+//       "https://lh3.googleusercontent.com/aida-public/AB6AXuA-PEfMCmBsAdSOxNXO-fFNUBHuUlE5P9pv-FaFiyBehCy8u7-EFicLPEP_n9-FnnN8V_5mj5QpnLhwcixpFvYCVpEM2J_2OaMRJfz80p2fhQPuX-D7Ug55QHf12UxUPgjehnb_FaD0DTWabodkFuEdBBuugE8_bthG00bCj0OOvpjJ9ixJo0zQECHHcfCGi0tJEDzHVQAxiq-L31il6vJ5DblkY3A-0rqfLfeS5PeyuByLZ9_M_hv3tg",
+//   },
+//   {
+//     title: "Photo Cake Special",
+//     description: "Personalised photo print cake, 0.5 kg",
+//     price: "₹1,499",
+//     rating: "4.9 (2.1k)",
+//     badge: "Bestseller",
+//     image:
+//       "https://lh3.googleusercontent.com/aida-public/AB6AXuC2N1NWG1kDBgtvnAQ6BdebyIWk-KtczTq21P0OcNh1-lfjiMW41pHfc_OfOBw6YLlpCRhWPTrOPGovXmuX-4NW_QYk1CaM7Rf2i0Gg4kALxYKq63-4DyR_yN_Egbyo_ZVdhN-Y2IcOs9qDqJCWCjFDjEFXGfYHsDik44iiRkzkt4qQvZQBGWJ9nmXNBWf66lQxH9Wn8HnCv81uEI8s2hLUMIg-svhN6yYD9Uwnra7QZ8flxGwJEDxGow",
+//   },
+//   {
+//     title: "Birthday Surprise Hamper",
+//     description: "Cake, balloons, chocolates & card",
+//     price: "₹2,299",
+//     rating: "5.0 (620)",
+//     badge: null,
+//     image:
+//       "https://lh3.googleusercontent.com/aida-public/AB6AXuBsUMTiUIlK-BvyqTudaF3hCC4vuJdtAgtiZ_SAkgSdaEEQ6ArCeGIbBfrrYH8gwcaTznkii6gY_VnzBLgkt4ffcq1M-Q_EdGOpoKEsy-R8SI4oxV-df5stGgyXWXDmRHOt2g_iRABA52ixyOTBFXvWC4fH5NPmHEQS3ZY26AmZLvoMe1C5Xuo5tJMTIQJvmwNVP-5V7zmGIsPEu-30NkIPLTcUt9BHIBURXvtEcS6adjFsehWpTfF38g",
+//   },
+//   {
+//     title: "Chocolate Truffle Cake",
+//     description: "1 kg rich chocolate truffle cake",
+//     price: "₹999",
+//     rating: "4.8 (1.4k)",
+//     badge: null,
+//     image:
+//       "https://lh3.googleusercontent.com/aida-public/AB6AXuDeYtWlLaEkb52raoUB5UHe_ozMf1Fan6skG3SE6UH6xvVM5Oxd_4bxLrrqtEn20DeOywonQYJG7yF8OnKRIBMKkITGOIg8UIGr-TAZCDUDWYQN-klMHi-HYEZ-V0Jykn8d8T3YgM0IWXTwI4ABpdeBSRUoopPXZ_Pu9Bdte7Jbf7tb3vC2VUm_F1R7GPK0fVOX6cQhaAU_PcgkYHqqCNUiTjgWpb5xB2wkCOuC5Paf15WNHUwP2I_0OA",
+//   },
+//   {
+//     title: "Kids Birthday Combo",
+//     description: "Cartoon theme cake with toy gift",
+//     price: "₹1,349",
+//     rating: "4.6 (700)",
+//     badge: "New",
+//     image:
+//       "https://lh3.googleusercontent.com/aida-public/AB6AXuAGvuLZcednIxtP7LvNDWh-M8j9yfFteRp7hlRekUe0b9dQV5Y_nXAAsr816jwS4NbeQ03kNVexoIPuOS4pN4eZrbVudqrfd8PDDYWyK36V8QLU_ksx-NulJT5M6IIsiS5tL5Z_thyHUyMlHu0z5qMaZyReqaylfuoLkcIkgVQXkybnGgB60SIWQp03LEt1Fzj6MeASn_uPgPhlGlC3HFSMntIsfTSwZIaVsWf-LXoSyHhbRB97AJoYaQ",
+//   },
+// ];
+
+// const filterChips = [
+//   "All",
+//   "Cakes",
+//   "Combos",
+//   "Balloons",
+//   "Same Day Delivery",
+//   "Under ₹1000",
+// ];
+
+// export default function BirthdayWishesPage() {
+//   const router = useRouter();
+//   const [activeFilter, setActiveFilter] = useState("All");
+
+//   const handleAddToCart = (event) => {
+//     event.preventDefault();
+//     if (!localStorage.getItem("rpetalsUser")) {
+//       router.push("/login?redirect=/cart");
+//       return;
+//     }
+//   };
+
+//   const handleBuyNow = (event) => {
+//     event.preventDefault();
+//     if (!localStorage.getItem("rpetalsUser")) {
+//       router.push("/login?redirect=/checkout");
+//       return;
+//     }
+//     router.push("/checkout");
+//   };
+
+//   useEffect(() => {
+//     const cards = document.querySelectorAll(".product-card-hover");
+//     const observer = new IntersectionObserver(
+//       (entries) => {
+//         entries.forEach((entry, index) => {
+//           if (entry.isIntersecting) {
+//             setTimeout(() => {
+//               entry.target.classList.add("opacity-100", "translate-y-0");
+//               entry.target.classList.remove("opacity-0", "translate-y-8");
+//             }, index * 100);
+//           }
+//         });
+//       },
+//       { threshold: 0.1 },
+//     );
+
+//     cards.forEach((card) => {
+//       card.classList.add(
+//         "opacity-0",
+//         "translate-y-8",
+//         "transition-all",
+//         "duration-500",
+//       );
+//       observer.observe(card);
+//     });
+
+//     return () => observer.disconnect();
+//   }, []);
+
+//   return (
+//     <main className="bg-background text-on-surface min-h-screen">
+//       {/* Breadcrumb */}
+//       <div className="max-w-container-max mx-auto px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
+//         <div className="flex items-center gap-1.5 text-xs sm:text-sm text-on-surface-variant">
+//           <Link href="/" className="hover:text-primary transition-colors">
+//             Home
+//           </Link>
+//           <span className="material-symbols-outlined text-[14px]">
+//             chevron_right
+//           </span>
+//           <span className="text-on-surface font-medium">Birthday Wishes</span>
+//         </div>
+//       </div>
+
+//       {/* Hero Banner */}
+//       <section className="pt-3 sm:pt-4 md:pt-6">
+//         <div className="max-w-container-max mx-auto px-3 sm:px-4">
+//           <div className="relative rounded-2xl overflow-hidden aspect-[3/1] min-h-[160px] sm:min-h-[200px] md:min-h-[260px] bg-surface-container shadow-lg">
+//             <div
+//               className="absolute inset-0 bg-cover bg-center"
+//               style={{
+//                 backgroundImage:
+//                   "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBsUMTiUIlK-BvyqTudaF3hCC4vuJdtAgtiZ_SAkgSdaEEQ6ArCeGIbBfrrYH8gwcaTznkii6gY_VnzBLgkt4ffcq1M-Q_EdGOpoKEsy-R8SI4oxV-df5stGgyXWXDmRHOt2g_iRABA52ixyOTBFXvWC4fH5NPmHEQS3ZY26AmZLvoMe1C5Xuo5tJMTIQJvmwNVP-5V7zmGIsPEu-30NkIPLTcUt9BHIBURXvtEcS6adjFsehWpTfF38g')",
+//               }}
+//             />
+//             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+//             <div className="relative z-10 h-full flex items-center px-5 sm:px-8 md:px-12">
+//               <div className="max-w-lg">
+//                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary text-white rounded-full text-[10px] sm:text-xs font-semibold mb-2 sm:mb-3">
+//                   <span className="material-symbols-outlined text-[14px]">
+//                     cake
+//                   </span>
+//                   Birthday Wishes
+//                 </span>
+//                 <h1 className="text-xl min-[480px]:text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1.5 sm:mb-2 leading-tight">
+//                   Make Their Day Sweeter
+//                 </h1>
+//                 <p className="text-xs sm:text-sm md:text-base text-white/85 max-w-sm">
+//                   Cakes, combos & surprises to celebrate every birthday in style.
+//                 </p>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Filter Chips */}
+//       <section className="py-4 sm:py-6">
+//         <div className="max-w-container-max mx-auto px-3 sm:px-4 md:px-6">
+//           <div className="flex gap-2 sm:gap-2.5 overflow-x-auto hide-scrollbar pb-1">
+//             {filterChips.map((chip) => (
+//               <button
+//                 key={chip}
+//                 onClick={() => setActiveFilter(chip)}
+//                 className={`flex-shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium border transition-all whitespace-nowrap ${
+//                   activeFilter === chip
+//                     ? "bg-primary text-white border-primary"
+//                     : "bg-surface text-on-surface-variant border-outline-variant hover:border-primary hover:text-primary"
+//                 }`}
+//               >
+//                 {chip}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Product Grid */}
+//       <section className="pb-12 sm:pb-16">
+//         <div className="max-w-container-max mx-auto px-3 sm:px-4 md:px-6">
+//           <div className="flex justify-between items-center mb-4 sm:mb-6">
+//             <p className="text-xs sm:text-sm text-on-surface-variant">
+//               {birthdayProducts.length} gifts found
+//             </p>
+//           </div>
+
+//           <div className="grid grid-cols-2 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-2.5 min-[480px]:gap-3.5 sm:gap-4 md:gap-6">
+//             {birthdayProducts.map((product) => (
+//               <Link
+//                 key={product.title}
+//                 href={`/products/${product.title
+//                   .toLowerCase()
+//                   .replace(/\s+/g, "-")
+//                   .replace(/[^a-z0-9-]/g, "")}`}
+//                 className="group bg-surface rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all product-card-hover border border-outline-variant duration-500 flex flex-col justify-between"
+//               >
+//                 <div>
+//                   <div className="relative aspect-square overflow-hidden bg-surface-container-low">
+//                     <img
+//                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+//                       src={product.image}
+//                       alt={product.title}
+//                       loading="lazy"
+//                     />
+//                     {product.badge && (
+//                       <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-primary text-white text-[8px] min-[480px]:text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+//                         {product.badge}
+//                       </div>
+//                     )}
+//                     <button
+//                       onClick={(e) => e.preventDefault()}
+//                       className="absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 min-[480px]:w-8 min-[480px]:h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"
+//                       aria-label="Add to Wishlist"
+//                     >
+//                       <span className="material-symbols-outlined text-[16px] min-[480px]:text-[18px] sm:text-[20px]">
+//                         favorite
+//                       </span>
+//                     </button>
+
+//                     {/* Desktop Hover Overlay */}
+//                     <div className="hidden md:block absolute bottom-0 left-0 w-full p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+//                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+//                         <button
+//                           onClick={(e) => handleAddToCart(e)}
+//                           className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-semibold shadow-lg hover:bg-primary/90 transition-colors"
+//                         >
+//                           Add to Cart
+//                         </button>
+//                         <button
+//                           onClick={(e) => handleBuyNow(e)}
+//                           className="flex-1 bg-on-surface text-white py-2 rounded-lg text-xs font-semibold shadow-lg hover:bg-primary transition-colors"
+//                         >
+//                           Buy Now
+//                         </button>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   <div className="p-2.5 min-[480px]:p-3 sm:p-4">
+//                     <h3 className="text-xs min-[480px]:text-sm sm:text-base md:text-[18px] font-bold text-on-surface line-clamp-1 mb-0.5">
+//                       {product.title}
+//                     </h3>
+//                     <p className="text-[11px] min-[480px]:text-xs sm:text-sm text-on-surface-variant line-clamp-1 mb-1.5 min-[480px]:mb-2">
+//                       {product.description}
+//                     </p>
+//                     <div className="flex justify-between items-center">
+//                       <span className="text-xs min-[480px]:text-sm sm:text-base font-bold text-primary">
+//                         {product.price}
+//                       </span>
+//                       <div className="flex items-center text-primary">
+//                         <span
+//                           className="material-symbols-outlined text-[13px] sm:text-[16px]"
+//                           style={{ fontVariationSettings: "'FILL' 1" }}
+//                         >
+//                           star
+//                         </span>
+//                         <span className="text-[10px] min-[480px]:text-xs text-on-surface-variant ml-0.5 font-medium">
+//                           {product.rating}
+//                         </span>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* Mobile Touch Action Buttons */}
+//                 <div className="px-2.5 min-[480px]:px-3 pb-2.5 min-[480px]:pb-3 pt-0 flex md:hidden gap-1.5">
+//                   <button
+//                     onClick={(e) => handleAddToCart(e)}
+//                     className="flex-1 bg-primary text-white py-1.5 rounded-lg text-[10px] min-[480px]:text-[11px] font-semibold active:scale-95 transition-transform"
+//                   >
+//                     Cart
+//                   </button>
+//                   <button
+//                     onClick={(e) => handleBuyNow(e)}
+//                     className="flex-1 bg-on-surface text-white py-1.5 rounded-lg text-[10px] min-[480px]:text-[11px] font-semibold active:scale-95 transition-transform"
+//                   >
+//                     Buy
+//                   </button>
+//                 </div>
+//               </Link>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+//     </main>
+//   );
+// }
+
+
+
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+// API: GET /api/categories/birthday/products — fetch Birthday products
+const birthdayProducts = [
+  {
+    title: "Rainbow Delight Cake",
+    description: "1 kg vanilla layered rainbow cake",
+    price: "₹899",
+    rating: "4.8 (1.8k)",
+    badge: "Top Rated",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBsUMTiUIlK-BvyqTudaF3hCC4vuJdtAgtiZ_SAkgSdaEEQ6ArCeGIbBfrrYH8gwcaTznkii6gY_VnzBLgkt4ffcq1M-Q_EdGOpoKEsy-R8SI4oxV-df5stGgyXWXDmRHOt2g_iRABA52ixyOTBFXvWC4fH5NPmHEQS3ZY26AmZLvoMe1C5Xuo5tJMTIQJvmwNVP-5V7zmGIsPEu-30NkIPLTcUt9BHIBURXvtEcS6adjFsehWpTfF38g",
+  },
+  {
+    title: "Balloon & Cake Combo",
+    description: "Birthday cake with 20 balloons",
+    price: "₹1,199",
+    rating: "4.7 (950)",
+    badge: "Same Day",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuA-PEfMCmBsAdSOxNXO-fFNUBHuUlE5P9pv-FaFiyBehCy8u7-EFicLPEP_n9-FnnN8V_5mj5QpnLhwcixpFvYCVpEM2J_2OaMRJfz80p2fhQPuX-D7Ug55QHf12UxUPgjehnb_FaD0DTWabodkFuEdBBuugE8_bthG00bCj0OOvpjJ9ixJo0zQECHHcfCGi0tJEDzHVQAxiq-L31il6vJ5DblkY3A-0rqfLfeS5PeyuByLZ9_M_hv3tg",
+  },
+  {
+    title: "Photo Cake Special",
+    description: "Personalised photo print cake, 0.5 kg",
+    price: "₹1,499",
+    rating: "4.9 (2.1k)",
+    badge: "Bestseller",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuC2N1NWG1kDBgtvnAQ6BdebyIWk-KtczTq21P0OcNh1-lfjiMW41pHfc_OfOBw6YLlpCRhWPTrOPGovXmuX-4NW_QYk1CaM7Rf2i0Gg4kALxYKq63-4DyR_yN_Egbyo_ZVdhN-Y2IcOs9qDqJCWCjFDjEFXGfYHsDik44iiRkzkt4qQvZQBGWJ9nmXNBWf66lQxH9Wn8HnCv81uEI8s2hLUMIg-svhN6yYD9Uwnra7QZ8flxGwJEDxGow",
+  },
+  {
+    title: "Birthday Surprise Hamper",
+    description: "Cake, balloons, chocolates & card",
+    price: "₹2,299",
+    rating: "5.0 (620)",
+    badge: null,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBsUMTiUIlK-BvyqTudaF3hCC4vuJdtAgtiZ_SAkgSdaEEQ6ArCeGIbBfrrYH8gwcaTznkii6gY_VnzBLgkt4ffcq1M-Q_EdGOpoKEsy-R8SI4oxV-df5stGgyXWXDmRHOt2g_iRABA52ixyOTBFXvWC4fH5NPmHEQS3ZY26AmZLvoMe1C5Xuo5tJMTIQJvmwNVP-5V7zmGIsPEu-30NkIPLTcUt9BHIBURXvtEcS6adjFsehWpTfF38g",
+  },
+  {
+    title: "Chocolate Truffle Cake",
+    description: "1 kg rich chocolate truffle cake",
+    price: "₹999",
+    rating: "4.8 (1.4k)",
+    badge: null,
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDeYtWlLaEkb52raoUB5UHe_ozMf1Fan6skG3SE6UH6xvVM5Oxd_4bxLrrqtEn20DeOywonQYJG7yF8OnKRIBMKkITGOIg8UIGr-TAZCDUDWYQN-klMHi-HYEZ-V0Jykn8d8T3YgM0IWXTwI4ABpdeBSRUoopPXZ_Pu9Bdte7Jbf7tb3vC2VUm_F1R7GPK0fVOX6cQhaAU_PcgkYHqqCNUiTjgWpb5xB2wkCOuC5Paf15WNHUwP2I_0OA",
+  },
+  {
+    title: "Kids Birthday Combo",
+    description: "Cartoon theme cake with toy gift",
+    price: "₹1,349",
+    rating: "4.6 (700)",
+    badge: "New",
+    image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAGvuLZcednIxtP7LvNDWh-M8j9yfFteRp7hlRekUe0b9dQV5Y_nXAAsr816jwS4NbeQ03kNVexoIPuOS4pN4eZrbVudqrfd8PDDYWyK36V8QLU_ksx-NulJT5M6IIsiS5tL5Z_thyHUyMlHu0z5qMaZyReqaylfuoLkcIkgVQXkybnGgB60SIWQp03LEt1Fzj6MeASn_uPgPhlGlC3HFSMntIsfTSwZIaVsWf-LXoSyHhbRB97AJoYaQ",
+  },
+];
+
+const filterChips = [
+  "All",
+  "Cakes",
+  "Combos",
+  "Balloons",
+  "Same Day Delivery",
+  "Under ₹1000",
+];
+
+export default function BirthdayWishesPage() {
+  const router = useRouter();
+  const [activeFilter, setActiveFilter] = useState("All");
+
+  const handleAddToCart = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!localStorage.getItem("rpetalsUser")) {
+      router.push("/login?redirect=/cart");
+      return;
+    }
+
+    router.push("/cart");
+  };
+
+  const handleBuyNow = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!localStorage.getItem("rpetalsUser")) {
+      router.push("/login?redirect=/checkout");
+      return;
+    }
+
+    router.push("/checkout");
+  };
+
+  useEffect(() => {
+    const cards = document.querySelectorAll(".product-card-hover");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add(
+                "opacity-100",
+                "translate-y-0"
+              );
+
+              entry.target.classList.remove(
+                "opacity-0",
+                "translate-y-8"
+              );
+            }, index * 100);
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+      }
+    );
+
+    cards.forEach((card) => {
+      card.classList.add(
+        "opacity-0",
+        "translate-y-8",
+        "transition-all",
+        "duration-500"
+      );
+
+      observer.observe(card);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <main className="bg-background text-on-surface min-h-screen w-full overflow-x-hidden">
+
+      {/* =========================================================
+          BREADCRUMB
+      ========================================================= */}
+      <div className="w-full max-w-container-max mx-auto px-3 sm:px-4 md:px-6 pt-3 sm:pt-5 md:pt-6">
+        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs md:text-sm text-on-surface-variant min-w-0">
+          <Link
+            href="/"
+            className="hover:text-primary transition-colors flex-shrink-0"
+          >
+            Home
+          </Link>
+
+          <span className="material-symbols-outlined text-[13px] sm:text-[14px] flex-shrink-0">
+            chevron_right
+          </span>
+
+          <span className="text-on-surface font-medium truncate">
+            Birthday Wishes
+          </span>
+        </div>
+      </div>
+
+      {/* =========================================================
+          HERO BANNER
+      ========================================================= */}
+      <section className="pt-3 sm:pt-4 md:pt-6">
+        <div className="w-full max-w-container-max mx-auto px-3 sm:px-4 md:px-6">
+          <div
+            className="
+              relative
+              w-full
+              overflow-hidden
+              rounded-xl
+              sm:rounded-2xl
+              min-h-[190px]
+              sm:min-h-[220px]
+              md:min-h-[260px]
+              lg:min-h-[290px]
+              xl:min-h-[310px]
+              bg-surface-container
+              shadow-lg
+            "
+          >
+            {/* Hero Background */}
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBsUMTiUIlK-BvyqTudaF3hCC4vuJdtAgtiZ_SAkgSdaEEQ6ArCeGIbBfrrYH8gwcaTznkii6gY_VnzBLgkt4ffcq1M-Q_EdGOpoKEsy-R8SI4oxV-df5stGgyXWXDmRHOt2g_iRABA52ixyOTBFXvWC4fH5NPmHEQS3ZY26AmZLvoMe1C5Xuo5tJMTIQJvmwNVP-5V7zmGIsPEu-30NkIPLTcUt9BHIBURXvtEcS6adjFsehWpTfF38g')",
+              }}
+            />
+
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/35 to-transparent" />
+
+            {/* Hero Content */}
+            <div
+              className="
+                relative
+                z-10
+                min-h-[190px]
+                sm:min-h-[220px]
+                md:min-h-[260px]
+                lg:min-h-[290px]
+                xl:min-h-[310px]
+                flex
+                items-center
+                px-4
+                min-[400px]:px-5
+                sm:px-8
+                md:px-10
+                lg:px-12
+              "
+            >
+              <div className="w-full max-w-[90%] sm:max-w-lg">
+
+                {/* Badge */}
+                <span
+                  className="
+                    inline-flex
+                    items-center
+                    gap-1
+                    px-2.5
+                    sm:px-3
+                    py-1
+                    bg-primary
+                    text-white
+                    rounded-full
+                    text-[9px]
+                    min-[400px]:text-[10px]
+                    sm:text-xs
+                    font-semibold
+                    mb-2
+                    sm:mb-3
+                  "
+                >
+                  <span className="material-symbols-outlined text-[13px] sm:text-[14px]">
+                    cake
+                  </span>
+
+                  Birthday Wishes
+                </span>
+
+                {/* Heading */}
+                <h1
+                  className="
+                    text-2xl
+                    min-[400px]:text-[27px]
+                    sm:text-3xl
+                    md:text-4xl
+                    lg:text-[42px]
+                    font-bold
+                    text-white
+                    mb-1.5
+                    sm:mb-2
+                    leading-tight
+                  "
+                >
+                  Make Their Day Sweeter
+                </h1>
+
+                {/* Description */}
+                <p
+                  className="
+                    text-[11px]
+                    min-[400px]:text-xs
+                    sm:text-sm
+                    md:text-base
+                    text-white/85
+                    max-w-[285px]
+                    sm:max-w-sm
+                    leading-relaxed
+                  "
+                >
+                  Cakes, combos & surprises to celebrate every birthday
+                  in style.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          FILTER CHIPS
+      ========================================================= */}
+      <section className="py-4 sm:py-5 md:py-6">
+        <div className="w-full max-w-container-max mx-auto px-3 sm:px-4 md:px-6">
+
+          <div
+            className="
+              flex
+              items-center
+              gap-2
+              sm:gap-2.5
+              overflow-x-auto
+              hide-scrollbar
+              pb-1
+              min-w-0
+            "
+          >
+            {filterChips.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => setActiveFilter(chip)}
+                className={`
+                  flex-shrink-0
+                  px-3
+                  min-[400px]:px-3.5
+                  sm:px-4
+                  py-1.5
+                  sm:py-2
+                  rounded-full
+                  text-[11px]
+                  min-[400px]:text-xs
+                  sm:text-sm
+                  font-medium
+                  border
+                  transition-all
+                  whitespace-nowrap
+                  touch-manipulation
+                  ${
+                    activeFilter === chip
+                      ? "bg-primary text-white border-primary"
+                      : "bg-surface text-on-surface-variant border-outline-variant hover:border-primary hover:text-primary"
+                  }
+                `}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* =========================================================
+          PRODUCT GRID
+      ========================================================= */}
+      <section className="pb-10 sm:pb-14 md:pb-16">
+        <div className="w-full max-w-container-max mx-auto px-3 sm:px-4 md:px-6">
+
+          {/* Result Count */}
+          <div className="flex items-center justify-between mb-4 sm:mb-5 md:mb-6">
+            <p className="text-xs sm:text-sm text-on-surface-variant">
+              {birthdayProducts.length} gifts found
+            </p>
+          </div>
+
+          {/* =====================================================
+              RESPONSIVE GRID
+
+              Mobile  : 2 columns
+              Tablet  : 3 columns
+              Desktop : 4 columns
+          ===================================================== */}
+          <div
+            className="
+              grid
+              grid-cols-2
+              gap-2.5
+              min-[400px]:gap-3
+              sm:gap-4
+              md:grid-cols-3
+              lg:grid-cols-4
+              lg:gap-5
+              xl:gap-6
+            "
+          >
+            {birthdayProducts.map((product) => {
+              const productSlug = product.title
+                .toLowerCase()
+                .replace(/\s+/g, "-")
+                .replace(/[^a-z0-9-]/g, "");
+
+              return (
+                <article
+                  key={product.title}
+                  className="
+                    group
+                    bg-surface
+                    rounded-xl
+                    sm:rounded-2xl
+                    overflow-hidden
+                    border
+                    border-outline-variant
+                    shadow-sm
+                    hover:shadow-lg
+                    transition-all
+                    duration-500
+                    product-card-hover
+                    flex
+                    flex-col
+                    min-w-0
+                  "
+                >
+
+                  {/* =================================================
+                      IMAGE + PRODUCT INFO LINK
+                  ================================================= */}
+                  <Link
+                    href={`/products/${productSlug}`}
+                    className="block min-w-0"
+                  >
+
+                    {/* Product Image */}
+                    <div
+                      className="
+                        relative
+                        aspect-square
+                        overflow-hidden
+                        bg-surface-container-low
+                      "
+                    >
+                      <img
+                        className="
+                          w-full
+                          h-full
+                          object-cover
+                          transition-transform
+                          duration-500
+                          group-hover:scale-105
+                        "
+                        src={product.image}
+                        alt={product.title}
+                        loading="lazy"
+                      />
+
+                      {/* Badge */}
+                      {product.badge && (
+                        <div
+                          className="
+                            absolute
+                            top-1.5
+                            left-1.5
+                            min-[400px]:top-2
+                            min-[400px]:left-2
+                            sm:top-3
+                            sm:left-3
+                            bg-primary
+                            text-white
+                            text-[8px]
+                            min-[400px]:text-[9px]
+                            sm:text-[10px]
+                            font-bold
+                            px-1.5
+                            sm:px-2
+                            py-0.5
+                            sm:py-1
+                            rounded
+                            uppercase
+                            tracking-wide
+                            max-w-[65%]
+                            truncate
+                          "
+                        >
+                          {product.badge}
+                        </div>
+                      )}
+
+                      {/* Wishlist */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="
+                          absolute
+                          top-1.5
+                          right-1.5
+                          min-[400px]:top-2
+                          min-[400px]:right-2
+                          sm:top-3
+                          sm:right-3
+                          w-7
+                          h-7
+                          min-[400px]:w-8
+                          min-[400px]:h-8
+                          sm:w-10
+                          sm:h-10
+                          rounded-full
+                          bg-white/85
+                          backdrop-blur-sm
+                          flex
+                          items-center
+                          justify-center
+                          text-on-surface-variant
+                          hover:text-primary
+                          transition-colors
+                          touch-manipulation
+                        "
+                        aria-label="Add to Wishlist"
+                      >
+                        <span
+                          className="
+                            material-symbols-outlined
+                            text-[15px]
+                            min-[400px]:text-[17px]
+                            sm:text-[20px]
+                          "
+                        >
+                          favorite
+                        </span>
+                      </button>
+
+                      {/* =================================================
+                          DESKTOP HOVER ACTIONS
+                      ================================================= */}
+                      <div
+                        className="
+                          hidden
+                          md:block
+                          absolute
+                          bottom-0
+                          left-0
+                          right-0
+                          p-2
+                          lg:p-3
+                          bg-gradient-to-t
+                          from-black/50
+                          to-transparent
+                          translate-y-full
+                          group-hover:translate-y-0
+                          transition-transform
+                          duration-300
+                        "
+                      >
+                        <div className="flex gap-2">
+
+                          <button
+                            type="button"
+                            onClick={handleAddToCart}
+                            className="
+                              flex-1
+                              min-w-0
+                              bg-primary
+                              text-white
+                              py-2
+                              lg:py-2.5
+                              rounded-lg
+                              text-[10px]
+                              lg:text-xs
+                              font-semibold
+                              shadow-lg
+                              hover:bg-primary/90
+                              transition-colors
+                              whitespace-nowrap
+                            "
+                          >
+                            Add to Cart
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleBuyNow}
+                            className="
+                              flex-1
+                              min-w-0
+                              bg-on-surface
+                              text-white
+                              py-2
+                              lg:py-2.5
+                              rounded-lg
+                              text-[10px]
+                              lg:text-xs
+                              font-semibold
+                              shadow-lg
+                              hover:bg-primary
+                              transition-colors
+                              whitespace-nowrap
+                            "
+                          >
+                            Buy Now
+                          </button>
+
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* =================================================
+                        PRODUCT INFORMATION
+                    ================================================= */}
+                    <div
+                      className="
+                        p-2
+                        min-[400px]:p-2.5
+                        sm:p-3
+                        lg:p-4
+                        min-w-0
+                      "
+                    >
+
+                      {/* Title */}
+                      <h3
+                        className="
+                          text-[11px]
+                          min-[400px]:text-xs
+                          sm:text-sm
+                          lg:text-base
+                          xl:text-[18px]
+                          font-bold
+                          text-on-surface
+                          line-clamp-1
+                          mb-0.5
+                          sm:mb-1
+                        "
+                      >
+                        {product.title}
+                      </h3>
+
+                      {/* Description */}
+                      <p
+                        className="
+                          text-[10px]
+                          min-[400px]:text-[11px]
+                          sm:text-xs
+                          lg:text-sm
+                          text-on-surface-variant
+                          line-clamp-1
+                          mb-1.5
+                          sm:mb-2
+                        "
+                      >
+                        {product.description}
+                      </p>
+
+                      {/* Price + Rating */}
+                      <div
+                        className="
+                          flex
+                          items-center
+                          justify-between
+                          gap-1
+                          min-w-0
+                        "
+                      >
+
+                        {/* Price */}
+                        <span
+                          className="
+                            text-xs
+                            min-[400px]:text-sm
+                            sm:text-base
+                            lg:text-lg
+                            font-bold
+                            text-primary
+                            flex-shrink-0
+                          "
+                        >
+                          {product.price}
+                        </span>
+
+                        {/* Rating */}
+                        <div
+                          className="
+                            flex
+                            items-center
+                            min-w-0
+                            text-primary
+                          "
+                        >
+                          <span
+                            className="
+                              material-symbols-outlined
+                              text-[12px]
+                              min-[400px]:text-[13px]
+                              sm:text-[16px]
+                              flex-shrink-0
+                            "
+                            style={{
+                              fontVariationSettings: "'FILL' 1",
+                            }}
+                          >
+                            star
+                          </span>
+
+                          <span
+                            className="
+                              text-[9px]
+                              min-[400px]:text-[10px]
+                              sm:text-xs
+                              text-on-surface-variant
+                              ml-0.5
+                              font-medium
+                              truncate
+                            "
+                          >
+                            {product.rating}
+                          </span>
+                        </div>
+
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* =================================================
+                      MOBILE TOUCH ACTION BUTTONS
+                  ================================================= */}
+                  <div
+                    className="
+                      flex
+                      md:hidden
+                      gap-1.5
+                      px-2
+                      min-[400px]:px-2.5
+                      pb-2
+                      min-[400px]:pb-2.5
+                    "
+                  >
+
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      className="
+                        flex-1
+                        min-w-0
+                        bg-primary
+                        text-white
+                        py-1.5
+                        min-[400px]:py-2
+                        rounded-lg
+                        text-[10px]
+                        min-[400px]:text-[11px]
+                        font-semibold
+                        active:scale-95
+                        transition-transform
+                        touch-manipulation
+                      "
+                    >
+                      Cart
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleBuyNow}
+                      className="
+                        flex-1
+                        min-w-0
+                        bg-on-surface
+                        text-white
+                        py-1.5
+                        min-[400px]:py-2
+                        rounded-lg
+                        text-[10px]
+                        min-[400px]:text-[11px]
+                        font-semibold
+                        active:scale-95
+                        transition-transform
+                        touch-manipulation
+                      "
+                    >
+                      Buy
+                    </button>
+
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}

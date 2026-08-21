@@ -206,7 +206,7 @@ export default function AdminPage() {
                     </div>
                 </header>
 
-                <div className="p-5 sm:p-8">
+                <div className="p-5 sm:p-8" style={{ paddingTop: '10px' }}>
                     {/* Welcome Section */}
                     <section>
                         <p className="text-sm text-[#8a8385]">Welcome back,</p>

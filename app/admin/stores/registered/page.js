@@ -961,26 +961,7 @@ export default function RegisterStoresPage() {
                     </button>
                 </header>
 
-                <div className="p-5 sm:p-8">
-
-
-                    {/* PAGE TITLE */}
-
-                    <div className="mb-8">
-
-                        <p className="text-sm text-[#8a8385]">
-                            Store Management
-                        </p>
-
-                        <h2 className="text-3xl font-bold mt-1">
-                            Register Store
-                        </h2>
-
-                        <p className="mt-2 text-sm text-[#8a8385] max-w-2xl">
-                            Add store and shopkeeper details with the exact shop location.
-                        </p>
-
-                    </div>
+                <div className="p-5 sm:p-8" style={{ paddingTop: '10px' }}>
 
 
                     {/* FORM */}

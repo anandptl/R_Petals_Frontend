@@ -17,18 +17,11 @@ import { apiFetch } from '@/lib/auth';
 export default function ShopAdminDashboard() {
 
     const router = useRouter();
-
-    const API_URL =
-        process.env.NEXT_PUBLIC_API_URL;
-
-    const [checking, setChecking] =
-        useState(true);
-
-    const [stores, setStores] =
-        useState([]);
-
-    const [loading, setLoading] =
-        useState(true);
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const [checking, setChecking] =useState(true);
+    const [user, setUser] = useState(null);
+    const [stores, setStores] =useState([]);
+    const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
@@ -193,43 +186,43 @@ export default function ShopAdminDashboard() {
 
             <main className="lg:ml-[255px] min-h-screen">
 
-
-                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center justify-between">
-
+                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center justify-between sticky top-0 z-10">
                     <div>
-
                         <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">
                             Store Management
                         </p>
-
-
                         <h1 className="text-xl font-semibold mt-1">
                             Stores Dashboard
                         </h1>
-
                     </div>
 
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            className="w-10 h-10 rounded-xl bg-[#faf7f8] flex items-center justify-center text-[#777174] hover:bg-[#f1e9ec] transition"
+                        >
+                            🔔
+                        </button>
 
-                    <div className="w-10 h-10 rounded-xl bg-[#e7dce1] text-[#6d5260] flex items-center justify-center font-bold">
-                        A
+                        <div className="w-10 h-10 rounded-xl bg-[#e7dce1] text-[#6d5260] flex items-center justify-center font-bold">
+                            {user?.name
+                                ? user.name.charAt(0).toUpperCase()
+                                : 'A'}
+                        </div>
                     </div>
-
                 </header>
 
 
-                <div className="p-5 sm:p-8">
+                <div className="p-5 sm:p-8" style={{ paddingTop: '10px' }}>
 
 
                     <section>
-
-                        <p className="text-sm text-[#8a8385]">
-                            Manage all registered stores and their details.
-                        </p>
-
-
                         <h2 className="text-3xl font-bold mt-1">
                             Store Management
                         </h2>
+                        <p className="text-sm text-[#8a8385]">
+                            Manage all registered stores and their details.
+                        </p>
 
                     </section>
 

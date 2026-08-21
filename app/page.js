@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken, initializeAuthSession } from "@/lib/auth";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // API: GET /api/categories — fetch all categories with name, icon, sub-items
 const categories = [
@@ -275,8 +276,77 @@ const createProductSlug = (product) => {
 
 export default function HomePage() {
 
-  // Use the same access-token/refresh-token session mechanism as Admin.
-  // The landing page stays public; this only restores/refreshes an existing session.
+  // show occasion functionality
+  const [occasions, setOccasions] = useState([]);
+
+  // useEffect(() => {
+  //   const fetchOccasions = async () => {
+  //     try {
+  //       const response = await fetch(`${API_URL}/occasions/visible`, {
+  //         method: "GET",
+  //         cache: "no-store",
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch occasions");
+  //       }
+
+  //       const data = await response.json();
+
+  //       setOccasions(Array.isArray(data) ? data : []);
+  //     } catch (error) {
+  //       console.error("OCCASION FETCH ERROR:", error);
+  //       setOccasions([]);
+  //     }
+  //   };
+
+  //   fetchOccasions();
+  // }, []);
+
+
+  useEffect(() => {
+    const fetchOccasions = async () => {
+      try {
+        const url = `${API_URL}/occasions/visible`;
+
+        console.log("========== OCCASION FETCH ==========");
+        console.log("URL:", url);
+
+        const response = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        console.log("STATUS:", response.status);
+        console.log("STATUS TEXT:", response.statusText);
+
+        const responseText = await response.text();
+
+        console.log("RESPONSE:", responseText);
+
+        if (!response.ok) {
+          throw new Error(
+            `Occasion API Error: ${response.status} - ${responseText}`
+          );
+        }
+
+        const data = responseText
+          ? JSON.parse(responseText)
+          : [];
+
+        console.log("OCCASIONS:", data);
+
+        setOccasions(Array.isArray(data) ? data : []);
+
+      } catch (error) {
+        console.error("OCCASION FETCH ERROR:", error);
+        setOccasions([]);
+      }
+    };
+
+    fetchOccasions();
+  }, []);
+
   useEffect(() => {
     const syncUser = () => {
       try {
@@ -398,10 +468,10 @@ export default function HomePage() {
 
       const productId = String(
         product?.id ??
-          product?._id ??
-          product?.productId ??
-          product?.title ??
-          "",
+        product?._id ??
+        product?.productId ??
+        product?.title ??
+        "",
       );
 
       const productName = product?.title ?? product?.productName ?? "";
@@ -409,7 +479,7 @@ export default function HomePage() {
       const existingIndex = safeWishlist.findIndex(
         (item) =>
           String(item?.productId ?? item?.id ?? item?.productName ?? "") ===
-            productId || item?.productName === productName,
+          productId || item?.productName === productName,
       );
 
       let updatedWishlist;
@@ -621,50 +691,51 @@ export default function HomePage() {
                 }
               }}
             >
-              {giftOccasions
-                .filter((occasion) => occasion.published)
-                .sort((a, b) => a.displayOrder - b.displayOrder)
-                .map((occasion) => (
-                  <Link
-                    key={occasion.id}
-                    href={occasion.redirectUrl}
-                    className="group relative overflow-hidden rounded-2xl bg-surface border border-outline-variant shadow-sm hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[145px] sm:w-[190px] md:w-[210px] lg:w-[220px] snap-start"
-                  >
-                    {/* Image */}
-                    <div className="relative aspect-[4/5] overflow-hidden">
-                      <img
-                        src={occasion.image}
-                        alt={occasion.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+              {occasions.map((occasion) => (
+                <Link
+                  key={occasion.id}
+                  href={`/categories/${occasion.occasionName
+                    .toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, "-")}`}
+                  className="group relative overflow-hidden rounded-2xl bg-surface border border-outline-variant shadow-sm hover:shadow-xl transition-all duration-300 flex-shrink-0 w-[145px] sm:w-[190px] md:w-[210px] lg:w-[220px] snap-start"
+                >
+                  {/* Image */}
+                  <div className="relative aspect-[4/5] overflow-hidden">
 
-                      {/* Premium Gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                    <img
+                      src={occasion.occasionImage}
+                      alt={occasion.occasionName}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
 
-                      {/* Occasion Content */}
-                      <div className="absolute inset-x-0 bottom-0 p-2.5 sm:p-3 md:p-4">
-                        <h3 className="text-[11px] sm:text-sm md:text-base font-bold text-white leading-tight line-clamp-2">
-                          {occasion.name}
-                        </h3>
+                    {/* Premium Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
-                        <p className="mt-1 text-[9px] sm:text-[11px] text-white/80 line-clamp-2">
-                          {occasion.description}
-                        </p>
+                    {/* Occasion Content */}
+                    <div className="absolute inset-x-0 bottom-0 p-2.5 sm:p-3 md:p-4">
 
-                        <div className="mt-2 inline-flex items-center text-[9px] sm:text-[11px] font-semibold text-white">
-                          Shop Now
-                          <span className="material-symbols-outlined text-[12px] sm:text-[15px] ml-0.5 transition-transform duration-300 group-hover:translate-x-1">
-                            arrow_forward
-                          </span>
-                        </div>
+                      <h3 className="text-[11px] sm:text-sm md:text-base font-bold text-white leading-tight line-clamp-2">
+                        {occasion.occasionName}
+                      </h3>
+
+                      <div className="mt-2 inline-flex items-center text-[9px] sm:text-[11px] font-semibold text-white">
+                        Shop Now
+
+                        <span className="material-symbols-outlined text-[12px] sm:text-[15px] ml-0.5 transition-transform duration-300 group-hover:translate-x-1">
+                          arrow_forward
+                        </span>
                       </div>
 
-                      {/* Top Glow */}
-                      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
                     </div>
-                  </Link>
-                ))}
+
+                    {/* Top Glow */}
+                    <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
+
+                  </div>
+                </Link>
+              ))}
             </div>
 
             {/* LEFT BUTTON */}
@@ -781,13 +852,12 @@ export default function HomePage() {
                       className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-10 w-6 h-6 sm:w-10 sm:h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center transition-colors"
                     >
                       <span
-                        className={`material-symbols-outlined text-[14px] sm:text-[20px] ${
-                          wishlist.some(
-                            (item) => item?.productName === product.title,
-                          )
-                            ? "text-red-500"
-                            : "text-on-surface-variant"
-                        }`}
+                        className={`material-symbols-outlined text-[14px] sm:text-[20px] ${wishlist.some(
+                          (item) => item?.productName === product.title,
+                        )
+                          ? "text-red-500"
+                          : "text-on-surface-variant"
+                          }`}
                       >
                         {wishlist.some(
                           (item) => item?.productName === product.title,

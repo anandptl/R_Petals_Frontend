@@ -10,9 +10,19 @@ export default function StoreInventoryPage() {
         <div className="min-h-screen bg-[#f7f7f5] text-[#292628]">
             <AdminSidebar />
             <main className="lg:ml-[255px] min-h-screen">
-                <Header />
-                <div className="p-5 sm:p-8">
-                    <p className="text-sm text-[#8a8385]">Monitor products and stock for each registered store.</p>
+                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center justify-between sticky top-0 z-10">
+                    <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Store Management</p>
+                        <h1 className="text-xl font-semibold mt-1">Store Inventory</h1>
+                    </div>
+                    <button
+                        onClick={() => router.push('/admin/stores')}
+                        className="px-4 py-2 rounded-xl bg-[#faf7f8] text-[#6d5260] font-semibold text-xs border border-[#eee9ea] hover:bg-[#f2eaed] transition"
+                    >
+                        ← Back to Stores
+                    </button>
+                </header>
+                <div className="p-5 sm:p-8" style={{ paddingTop: '10px' }}>
                     <h2 className="text-3xl font-bold mt-1">Store Inventory</h2>
                     <div className="mt-8 bg-white rounded-2xl p-10 text-center shadow-[4px_4px_14px_rgba(0,0,0,0.04),-4px_-4px_14px_rgba(255,255,255,0.8)]">
                         <div className="w-14 h-14 rounded-2xl bg-[#eee4eb] text-[#694f5c] flex items-center justify-center mx-auto"><Package size={24} /></div>

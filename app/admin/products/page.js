@@ -122,11 +122,8 @@ export default function AdminProductsPage() {
                     </div>
                 </header>
 
-                <div className="p-5 sm:p-8">
+                <div className="p-5 sm:p-8" style={{ paddingTop: '10px' }}>
                     <section>
-                        <p className="text-sm text-[#8a8385]">
-                            Inventory Dashboard
-                        </p>
                         <h2 className="text-3xl font-bold mt-1">
                             Products Overview
                         </h2>
@@ -136,7 +133,7 @@ export default function AdminProductsPage() {
                     </section>
 
                     <section className="mt-8">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <ActionCard
                                 icon="➕"
                                 title="Add Product"
@@ -151,14 +148,6 @@ export default function AdminProductsPage() {
                                 description="Browse complete product inventory and current stock status."
                                 actionText="View Catalog"
                                 onClick={() => router.push('/admin/products/all')}
-                            />
-
-                            <ActionCard
-                                icon="⚙️"
-                                title="Update & Delete"
-                                description="Edit existing products, modify rates or remove items."
-                                actionText="Manage Products"
-                                onClick={() => router.push('/admin/products/manage')}
                             />
                         </div>
                     </section>

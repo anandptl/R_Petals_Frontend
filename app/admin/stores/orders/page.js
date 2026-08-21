@@ -3,14 +3,25 @@
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, ArrowRight } from 'lucide-react';
 import AdminSidebar from '@/app/admin/components/AdminSidebar';
-
 export default function StoreOrdersPage() {
     const router = useRouter();
     return (
         <div className="min-h-screen bg-[#f7f7f5] text-[#292628]">
             <AdminSidebar />
             <main className="lg:ml-[255px] min-h-screen">
-                <Header />
+                <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center justify-between sticky top-0 z-10">
+                    <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Store Management</p>
+                        <h1 className="text-xl font-semibold mt-1">Store Orders</h1>
+                    </div>
+                    <button
+                        onClick={() => router.push('/admin/stores')}
+                        className="px-4 py-2 rounded-xl bg-[#faf7f8] text-[#6d5260] font-semibold text-xs border border-[#eee9ea] hover:bg-[#f2eaed] transition"
+                    >
+                        ← Back to Stores
+                    </button>
+                </header>
+                
                 <div className="p-5 sm:p-8">
                     <p className="text-sm text-[#8a8385]">Track orders belonging to registered stores.</p>
 
