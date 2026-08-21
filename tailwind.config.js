@@ -59,7 +59,7 @@ module.exports = {
       spacing: {
         'margin-desktop': '64px',
         gutter: '24px',
-        'container-max': '1280px',
+        'container-max': '1600px',
         unit: '8px',
         'margin-mobile': '20px',
         base: '4px',

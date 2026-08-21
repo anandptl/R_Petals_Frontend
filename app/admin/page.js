@@ -24,33 +24,33 @@ export default function AdminPage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     useEffect(() => {
-        initializeAuthSession();
+        let mounted = true;
 
-        const token = localStorage.getItem('accessToken');
-        const role = localStorage.getItem('role');
-        const storedUser = localStorage.getItem('rpetalsUser');
-
-        if (!token) {
-            router.replace('/login?redirect=/admin');
-            return;
-        }
-
-        if (role !== 'ADMIN') {
-            router.replace('/');
-            return;
-        }
-
-        setChecking(false);
-
-        if (storedUser) {
+        const restoreAndLoad = async () => {
             try {
-                setUser(JSON.parse(storedUser));
-            } catch {
-                setUser(null);
-            }
-        }
+                const token = await initializeAuthSession();
 
-        const loadDashboard = async () => {
+                if (!mounted) return;
+
+                const role = localStorage.getItem('role')?.toUpperCase();
+                const storedUser = localStorage.getItem('rpetalsUser');
+
+                if (!token || role !== 'ADMIN') {
+                    router.replace(!token ? '/login?redirect=/admin' : '/');
+                    return;
+                }
+
+                if (storedUser) {
+                    try {
+                        setUser(JSON.parse(storedUser));
+                    } catch {
+                        setUser(null);
+                    }
+                }
+
+                setChecking(false);
+
+                const loadDashboard = async () => {
             try {
                 setDashboardLoading(true);
                 const response = await apiFetch(`${API_URL}/admin/dashboard`, {
@@ -147,10 +147,21 @@ export default function AdminPage() {
             }
         };
 
-        // Dono APIs ko parallel call karein
-        loadDashboard();
-        loadStoreStatus();
+                // Dono APIs ko parallel call karein
+                await Promise.all([loadDashboard(), loadStoreStatus()]);
+            } catch (error) {
+                console.error('ADMIN SESSION ERROR:', error);
+                if (mounted) {
+                    router.replace('/login?redirect=/admin');
+                }
+            }
+        };
 
+        restoreAndLoad();
+
+        return () => {
+            mounted = false;
+        };
     }, [router, API_URL]);
 
     if (checking) {

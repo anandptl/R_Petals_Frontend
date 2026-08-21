@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext"; 
+import { getStoredUser, initializeAuthSession, logout } from "@/lib/auth";
 const categories = [
   {
     name: "Flowers",
@@ -55,7 +55,8 @@ const occasionsItems = [
 ];
 
 const categoryRoutes = {
-  Flowers: "/categories/flowers",
+  // Flowers: "/categories/flowers",
+  Flowers: "/categoy/[category",
   Cakes: "/categories/cakes",
   Plants: "/categories/plants",
   Personalised: "/categories/personalised",
@@ -167,14 +168,47 @@ function NavDropdown({ item, index, cat, isMobile = false }) {
 
 export default function Header() {
   const router = useRouter();
-  const { user, logout } = useAuth(); 
+  const [user, setUser] = useState(null);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout(); 
-    setAccountSheetOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      setUser(null);
+      setProfileMenuOpen(false);
+      setAccountSheetOpen(false);
+      router.replace("/");
+    }
   };
+
+  useEffect(() => {
+    let mounted = true;
+
+    const syncUser = () => {
+      if (mounted) {
+        setUser(getStoredUser());
+      }
+    };
+
+    syncUser();
+    window.addEventListener("rpetals-auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      initializeAuthSession()
+        .then(() => syncUser())
+        .catch(() => syncUser());
+    }
+
+    return () => {
+      mounted = false;
+      window.removeEventListener("rpetals-auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
 
   useEffect(() => {
     const header = document.querySelector("header");

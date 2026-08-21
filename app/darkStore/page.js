@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { logout } from '@/lib/auth';
+import { getStoredUser, initializeAuthSession, logout } from '@/lib/auth';
 
 export default function ShopkeeperPage() {
     const router = useRouter();
@@ -11,29 +11,41 @@ export default function ShopkeeperPage() {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        const role = localStorage.getItem('role');
-        const storedUser = localStorage.getItem('rpetalsUser');
+        let mounted = true;
 
-        if (!token) {
-            router.replace('/login?redirect=/shopkeeper');
-            return;
-        }
-
-        if (role !== 'SHOPKEEPER') {
-            router.replace('/');
-            return;
-        }
-
-        if (storedUser) {
+        const restoreSession = async () => {
             try {
-                setUser(JSON.parse(storedUser));
-            } catch {
-                setUser(null);
-            }
-        }
+                const token = await initializeAuthSession();
 
-        setChecking(false);
+                if (!mounted) return;
+
+                const role = localStorage.getItem('role')?.toUpperCase();
+
+                if (!token) {
+                    router.replace('/login?redirect=/darkStore');
+                    return;
+                }
+
+                if (role !== 'SHOPKEEPER') {
+                    router.replace('/');
+                    return;
+                }
+
+                setUser(getStoredUser());
+                setChecking(false);
+            } catch (error) {
+                console.error('SHOPKEEPER SESSION ERROR:', error);
+                if (mounted) {
+                    router.replace('/login?redirect=/darkStore');
+                }
+            }
+        };
+
+        restoreSession();
+
+        return () => {
+            mounted = false;
+        };
     }, [router]);
 
     const handleLogout = async () => {

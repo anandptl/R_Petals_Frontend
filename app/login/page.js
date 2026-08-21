@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { refreshAccessToken } from '@/lib/auth';
+import { refreshAccessToken, saveLoginData, startAuthRefreshScheduler } from '@/lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -79,6 +79,18 @@ export default function LoginPage() {
         // -------------------------------------------------
 
         if (accessToken) {
+          const role = localStorage.getItem('role')?.toUpperCase();
+
+          if (role === 'ADMIN') {
+            router.replace('/admin');
+          } else if (role === 'SHOPKEEPER') {
+            router.replace('/darkStore');
+          } else if (role === 'USER') {
+            router.replace(redirectPath || '/');
+          } else {
+            await refreshAccessToken({ force: true });
+          }
+
           return;
         }
 
@@ -545,42 +557,8 @@ export default function LoginPage() {
       =====================================================
       */
 
-      localStorage.setItem(
-        'accessToken',
-        loginData.accessToken
-      );
-
-
-      /*
-      =====================================================
-      SAVE ROLE
-      =====================================================
-      */
-
-      if (loginData.role) {
-
-        localStorage.setItem(
-          'role',
-          loginData.role
-        );
-      }
-
-
-      /*
-      =====================================================
-      SAVE USER
-      =====================================================
-      */
-
-      if (loginData.user) {
-
-        localStorage.setItem(
-          'rpetalsUser',
-          JSON.stringify(
-            loginData.user
-          )
-        );
-      }
+      saveLoginData(loginData);
+      startAuthRefreshScheduler();
 
 
       /*

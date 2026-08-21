@@ -1,8 +1,6 @@
 import { EB_Garamond, Hanken_Grotesk } from 'next/font/google';
 import './globals.css';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import { AuthProvider } from './context/AuthContext';
+import AppShell from './components/AppShell';
 
 const garamond = EB_Garamond({
   subsets: ['latin'],
@@ -32,11 +30,7 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href={materialSymbols.url} crossOrigin="anonymous" />
       </head>
       <body className="bg-background text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
-        <AuthProvider>
-          <Header />
-          {children}
-          <Footer />
-        </AuthProvider>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

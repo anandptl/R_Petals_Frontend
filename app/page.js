@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getAccessToken, initializeAuthSession } from "@/lib/auth";
 
 // API: GET /api/categories — fetch all categories with name, icon, sub-items
 const categories = [
@@ -273,8 +274,41 @@ const createProductSlug = (product) => {
 };
 
 export default function HomePage() {
+
+  // Use the same access-token/refresh-token session mechanism as Admin.
+  // The landing page stays public; this only restores/refreshes an existing session.
+  useEffect(() => {
+    const syncUser = () => {
+      try {
+        const raw = localStorage.getItem("rpetalsUser");
+        setUser(raw ? JSON.parse(raw) : null);
+      } catch {
+        setUser(null);
+      }
+    };
+
+    syncUser();
+
+    if (getAccessToken()) {
+      initializeAuthSession()
+        .then(syncUser)
+        .catch((error) => {
+          console.error("LANDING SESSION ERROR:", error);
+          syncUser();
+        });
+    }
+
+    window.addEventListener("rpetals-auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("rpetals-auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
+
   const router = useRouter();
-  const { user } = useAuth();
+  const [user, setUser] = useState(null);
   const [wishlist, setWishlist] = useState([]);
 
   const occasionCarouselRef = useRef(null);

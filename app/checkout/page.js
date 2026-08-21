@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
+import { getStoredUser, initializeAuthSession } from "@/lib/auth";
 
 import {
   ArrowLeft,
@@ -47,14 +47,39 @@ const readLocalCart = () => {
 };
 
 export default function CheckoutPage() {
-  const { user, loading } = useAuth();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login?redirect=/checkout");
-    }
-  }, [user, loading, router]);
+    let mounted = true;
+
+    const restoreSession = async () => {
+      try {
+        const token = await initializeAuthSession();
+
+        if (!mounted) return;
+
+        if (!token) {
+          router.replace("/login?redirect=/checkout");
+          return;
+        }
+
+        setUser(getStoredUser());
+      } catch (error) {
+        console.error("CHECKOUT SESSION ERROR:", error);
+        if (mounted) router.replace("/login?redirect=/checkout");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    restoreSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 
   const [formData, setFormData] = useState({
     receiverName: "",

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
+import { getStoredUser, initializeAuthSession, logout } from "@/lib/auth";
 
 const LOCAL_CART_KEY = "local-cart";
 
@@ -106,17 +106,42 @@ const normalizeCartItem = (item) => ({
 
 export default function CartPage() {
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [cartItems, setCartItems] = useState([]);
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   const [cartLoaded, setCartLoaded] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login?redirect=/cart");
-    }
-  }, [user, loading, router]);
+    let mounted = true;
+
+    const restoreSession = async () => {
+      try {
+        const token = await initializeAuthSession();
+
+        if (!mounted) return;
+
+        if (!token) {
+          router.replace("/login?redirect=/cart");
+          return;
+        }
+
+        setUser(getStoredUser());
+      } catch (error) {
+        console.error("CART SESSION ERROR:", error);
+        if (mounted) router.replace("/login?redirect=/cart");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    restoreSession();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
 
   useEffect(() => {
     const storedCart = readLocalCart();
@@ -143,10 +168,11 @@ export default function CartPage() {
     }
   }, [cartItems, cartLoaded]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
     setAccountSheetOpen(false);
-    router.push("/");
+    router.replace("/");
   };
 
   const totals = useMemo(() => {

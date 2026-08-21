@@ -38,3 +38,6 @@ Thumbs.db
 
 # Certificates
 *.pem
+
+# Ignore entire Categories folder
+Categories/

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../context/AuthContext";
+import { getStoredUser } from "@/lib/auth";
 
 const LOCAL_WISHLIST_KEY = "local-wishlist";
 
@@ -79,9 +79,23 @@ const createProductSlug = (product) => {
 
 export default function BestsellersPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const [user, setUser] = useState(null);
 
   const [wishlist, setWishlist] = useState([]);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+
+    const syncUser = () => setUser(getStoredUser());
+
+    window.addEventListener("rpetals-auth-changed", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("rpetals-auth-changed", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
 
   useEffect(() => {
     try {
