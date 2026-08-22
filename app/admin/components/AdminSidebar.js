@@ -88,6 +88,7 @@ export default function AdminSidebar() {
           <img
             src="/logo1.png"
             alt="R Petals"
+            onClick={() => router.push('/admin')}
             className="h-9 w-auto object-contain"
           />
         </div>
@@ -118,6 +119,7 @@ export default function AdminSidebar() {
           <img
             src="/logo1.png"
             alt="R Petals"
+            onClick={() => router.push('/admin')} 
             className="h-12 w-auto object-contain"
           />
 

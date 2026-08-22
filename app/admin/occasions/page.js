@@ -6,14 +6,26 @@ import AdminSidebar from '@/app/admin/components/AdminSidebar';
 import { apiFetch, initializeAuthSession } from '@/lib/auth';
 
 export default function AdminOccasionsPage() {
+
     const router = useRouter();
 
     const [checking, setChecking] = useState(true);
     const [user, setUser] = useState(null);
 
+    const [stats, setStats] = useState({
+        totalOccasions: 0,
+        activeOccasions: 0,
+        upcomingOccasions: 0,
+    });
+
+    const [statsLoading, setStatsLoading] = useState(true);
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
+    
+
     useEffect(() => {
+
         initializeAuthSession();
 
         const token = localStorage.getItem('accessToken');
@@ -39,17 +51,87 @@ export default function AdminOccasionsPage() {
                 setUser(null);
             }
         }
+
+
+
     }, [router, API_URL]);
+
+
+    useEffect(() => {
+
+        const loadStats = async () => {
+
+            try {
+
+                setStatsLoading(true);
+
+                const response = await apiFetch(`${API_URL}/occasions/stats`, {
+
+                        method: 'GET',
+                    }
+                );
+
+                console.log(
+                    'Stats status:',
+                    response.status
+                );
+
+                const text = await response.text();
+
+                console.log(
+                    'Stats response:',
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Failed to load occasion stats: ${response.status}`
+                    );
+                }
+
+                const data = JSON.parse(text);
+
+                console.log('Occasion Stats:', data);
+
+                setStats({
+                    totalOccasions: data.totalOccasions ?? 0,
+                    activeOccasions: data.activeOccasions ?? 0,
+                    upcomingOccasions: data.upcomingOccasions ?? 0,
+                });
+
+            } catch (error) {
+
+                console.error(
+                    'Failed to load occasion stats:',
+                    error
+                );
+
+            } finally {
+
+                setStatsLoading(false);
+
+            }
+
+        };
+
+        if (!checking) {
+            loadStats();
+        }
+
+    }, [checking]);
+
 
     if (checking) {
         return (
             <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center">
                 <div className="text-center">
+
                     <div className="w-10 h-10 border-4 border-[#e6e1e3] border-t-[#6d5260] rounded-full animate-spin mx-auto" />
 
                     <p className="mt-4 text-sm text-[#777174]">
                         Loading occasions console...
                     </p>
+
                 </div>
             </div>
         );
@@ -169,17 +251,29 @@ export default function AdminOccasionsPage() {
 
                                 <StatCard
                                     title="Total Occasions"
-                                    value="—"
+                                    value={
+                                        statsLoading
+                                            ? '...'
+                                            : stats.totalOccasions
+                                    }
                                 />
 
                                 <StatCard
                                     title="Active Occasions"
-                                    value="—"
+                                    value={
+                                        statsLoading
+                                            ? '...'
+                                            : stats.activeOccasions
+                                    }
                                 />
 
                                 <StatCard
                                     title="Upcoming Occasions"
-                                    value="—"
+                                    value={
+                                        statsLoading
+                                            ? '...'
+                                            : stats.upcomingOccasions
+                                    }
                                 />
 
                             </div>

@@ -6,35 +6,34 @@ import { Plus, Eye, Pencil, Trash2, Search, X } from 'lucide-react';
 import AdminSidebar from '@/app/admin/components/AdminSidebar';
 import { apiFetch, initializeAuthSession } from '@/lib/auth'; //[cite: 2]
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
-export default function AdminOccasionsPage() {
+export default function AdminFeelingsPage() {
   const router = useRouter();
 
-  // Auth states
+  // Authentication states
   const [checking, setChecking] = useState(true);
   const [user, setUser] = useState(null);
 
-  // Occasions list and search states
-  const [occasions, setOccasions] = useState([]);
+  // Feelings list and search states
+  const [feelings, setFeelings] = useState([]);
   const [search, setSearch] = useState('');
-  const [loadingOccasions, setLoadingOccasions] = useState(false);
-  const [occasionError, setOccasionError] = useState('');
+  const [loadingFeelings, setLoadingFeelings] = useState(false);
+  const [feelingError, setFeelingError] = useState('');
 
-  // Modal states
+  // Modal display states
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingOccasion, setEditingOccasion] = useState(null);
-  const [viewingOccasion, setViewingOccasion] = useState(null);
+  const [editingFeeling, setEditingFeeling] = useState(null);
+  const [viewingFeeling, setViewingFeeling] = useState(null);
 
-  // Form states (date is optional)
-  const [formData, setFormData] = useState({ occasionName: '', occasionDate: '', active: true, image: null });
+  // Form edit states
+  const [formData, setFormData] = useState({ feelingName: '', active: true, image: null });
   const [previewImage, setPreviewImage] = useState('');
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
-
   const fileInputRef = useRef(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-  // Check user authentication and role
+
+  // Verify authentication and admin privileges
   useEffect(() => {
     initializeAuthSession(); //[cite: 2]
 
@@ -43,7 +42,7 @@ export default function AdminOccasionsPage() {
     const storedUser = localStorage.getItem('rpetalsUser');
 
     if (!token) {
-      router.replace('/login?redirect=/admin/occasions');
+      router.replace('/login?redirect=/admin/feelings/all');
       return;
     }
 
@@ -63,48 +62,49 @@ export default function AdminOccasionsPage() {
     setChecking(false);
   }, [router]);
 
-  // Fetch all occasions on initial render
+  // Fetch all feelings from the backend API
   useEffect(() => {
     if (checking) return;
 
-    const loadOccasions = async () => {
-      setLoadingOccasions(true);
-      setOccasionError('');
+    const loadFeelings = async () => {
+      setLoadingFeelings(true);
+      setFeelingError('');
 
       try {
-        const response = await apiFetch(`${API_URL}/occasions/all`, { method: 'GET' }); //[cite: 2]
-
+        const response = await apiFetch(`${API_URL}/feelings/all`, {
+          method: 'GET'
+        });
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `Failed to load occasions: ${response.status}`);
+          throw new Error(errorData.message || `Failed to load feelings: ${response.status}`);
         }
 
         const data = await response.json();
-        setOccasions(Array.isArray(data) ? data : []);
+        setFeelings(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error('Failed to load occasions:', error);
-        setOccasionError(error.message || 'Failed to load occasions.');
-        setOccasions([]);
+        console.error('Failed to load feelings:', error);
+        setFeelingError(error.message || 'Failed to load feelings.');
+        setFeelings([]);
       } finally {
-        setLoadingOccasions(false);
+        setLoadingFeelings(false);
       }
     };
 
-    loadOccasions();
+    loadFeelings();
   }, [checking]);
 
-  // Sort matched items to the top and mark matching status
-  const processedOccasions = useMemo(() => {
+  // Filter and prioritize matched search queries to the top
+  const processedFeelings = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) {
-      return occasions.map((item) => ({ ...item, isMatched: false }));
+      return feelings.map((item) => ({ ...item, isMatched: false }));
     }
 
     const matched = [];
     const unmatched = [];
 
-    occasions.forEach((item) => {
-      const name = (item.occasionName || '').toLowerCase();
+    feelings.forEach((item) => {
+      const name = (item.feelingName || '').toLowerCase();
       if (name.includes(query)) {
         matched.push({ ...item, isMatched: true });
       } else {
@@ -113,20 +113,23 @@ export default function AdminOccasionsPage() {
     });
 
     return [...matched, ...unmatched];
-  }, [occasions, search]);
+  }, [feelings, search]);
 
-  // Open edit modal with selected occasion details
-  const openEditModal = (occasion) => {
-    setEditingOccasion(occasion);
+  // Open edit modal and populate state
+  const openEditModal = (feeling) => {
+    setEditingFeeling(feeling);
     setFormData({
-      occasionName: occasion.occasionName || '',
-      occasionDate: occasion.occasionDate ? occasion.occasionDate.substring(0, 10) : '',
-      active: occasion.active ?? true,
+      feelingName: feeling.feelingName || '',
+      active: feeling.active ?? true,
       image: null,
     });
-    setPreviewImage(occasion.occasionImage || '');
+    setPreviewImage(feeling.feelingImage || '');
     setErrors({});
     setShowEditModal(true);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Reset form and close edit modal
@@ -134,8 +137,8 @@ export default function AdminOccasionsPage() {
     if (isSaving) return;
 
     setShowEditModal(false);
-    setEditingOccasion(null);
-    setFormData({ occasionName: '', occasionDate: '', active: true, image: null });
+    setEditingFeeling(null);
+    setFormData({ feelingName: '', active: true, image: null });
     setPreviewImage('');
     setErrors({});
 
@@ -144,19 +147,19 @@ export default function AdminOccasionsPage() {
     }
   };
 
-  // Handle standard text and date input changes
+  // Handle text input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  // Handle active status toggle
+  // Toggle active status boolean
   const handleActiveToggle = () => {
     setFormData((prev) => ({ ...prev, active: !prev.active }));
   };
 
-  // Handle file input validation and preview creation
+  // Handle image file selection and preview creation
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -180,130 +183,93 @@ export default function AdminOccasionsPage() {
     setErrors((prev) => ({ ...prev, image: '' }));
   };
 
-  // Validate form fields prior to submission (date is not required)
+  // Form input validation
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.occasionName.trim()) {
-      newErrors.occasionName = 'Occasion name is required.';
+    if (!formData.feelingName.trim()) {
+      newErrors.feelingName = 'Feeling name is required.';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submit updated occasion data (date can be null/empty)
+  // Submit update request for feeling
   const handleUpdate = async (e) => {
     e.preventDefault();
-
-    if (!editingOccasion || !validateForm()) {
-      return;
-    }
+    if (!editingFeeling || !validateForm()) return;
 
     setIsSaving(true);
 
     try {
       const data = new FormData();
-
-      data.append('occasionName', formData.occasionName.trim());
+      data.append('feelingName', formData.feelingName.trim());
       data.append('active', String(formData.active));
-
-      // Occasion date is OPTIONAL
-      if (formData.occasionDate) {
-        data.append(
-          'occasionDate',
-          `${formData.occasionDate}T00:00:00`
-        );
-      } else {
-        data.append('occasionDate', '');
-      }
 
       if (formData.image) {
         data.append('image', formData.image);
       }
 
-      const response = await apiFetch(
-        `${API_URL}/occasions/${editingOccasion.id}`,
-        {
-          method: 'PUT',
-          body: data,
-        }
-      );
+      const response = await apiFetch(`${API_URL}/feelings/${editingFeeling.id}`, {
+        method: 'PUT',
+        body: data,
+      }); //[cite: 2]
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-
-        throw new Error(
-          errorData.message ||
-          `Failed to update occasion: ${response.status}`
-        );
+        throw new Error(errorData.message || `Failed to update feeling: ${response.status}`);
       }
 
-      const updatedOccasion = await response.json();
+      const updatedFeeling = await response.json();
 
-      setOccasions((prev) =>
-        prev.map((item) =>
-          item.id === updatedOccasion.id
-            ? updatedOccasion
-            : item
-        )
+      setFeelings((prev) =>
+        prev.map((item) => (item.id === updatedFeeling.id ? updatedFeeling : item))
       );
 
+      setViewingFeeling(null);
       closeEditModal();
-
     } catch (error) {
-      console.error('Failed to update occasion:', error);
-      alert(error.message || 'Failed to update occasion.');
-
+      console.error('Failed to update feeling:', error);
+      setErrors({ submit: error.message || 'Failed to update feeling.' });
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Delete an occasion with user confirmation
-  const handleDelete = async (occasion) => {
-    const confirmed = window.confirm(`Are you sure you want to delete "${occasion.occasionName}"?`);
+  // Delete a feeling record with user confirmation
+  const handleDelete = async (feeling) => {
+    const confirmed = window.confirm(`Are you sure you want to delete "${feeling.feelingName}"?`);
     if (!confirmed) return;
 
     try {
-      const response = await apiFetch(`${API_URL}/occasions/${occasion.id}`, { method: 'DELETE' }); //[cite: 2]
+      const response = await apiFetch(`${API_URL}/feelings/${feeling.id}`, { method: 'DELETE' }); //[cite: 2]
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || `Failed to delete occasion: ${response.status}`);
+        throw new Error(data.message || `Failed to delete feeling: ${response.status}`);
       }
 
-      setOccasions((prev) => prev.filter((item) => item.id !== occasion.id));
+      setFeelings((prev) => prev.filter((item) => item.id !== feeling.id));
 
-      if (viewingOccasion?.id === occasion.id) {
-        setViewingOccasion(null);
+      if (viewingFeeling?.id === feeling.id) {
+        setViewingFeeling(null);
+      }
+
+      if (editingFeeling?.id === feeling.id) {
+        closeEditModal();
       }
     } catch (error) {
-      console.error('Failed to delete occasion:', error);
-      alert(error.message || 'Failed to delete occasion.');
+      console.error('Failed to delete feeling:', error);
+      setFeelingError(error.message || 'Failed to delete feeling.');
     }
   };
 
-  // Format ISO date string into Indian locale display format
-  const formatDate = (date) => {
-    if (!date) return '-';
-    const parsedDate = new Date(date);
-    if (Number.isNaN(parsedDate.getTime())) return '-';
-
-    return parsedDate.toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
-  // Render loading screen during auth verification
+  // Auth checking loader screen
   if (checking) {
     return (
       <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-[#e6e1e3] border-t-[#6d5260] rounded-full animate-spin mx-auto" />
-          <p className="mt-4 text-sm text-[#777174]">Loading occasions console...</p>
+          <p className="mt-4 text-sm text-[#777174]">Loading feelings console...</p>
         </div>
       </div>
     );
@@ -311,33 +277,33 @@ export default function AdminOccasionsPage() {
 
   return (
     <div className="min-h-screen bg-[#f7f7f5] text-[#292628]">
-      {/* Navigation sidebar component */}
+      {/* Admin Sidebar Navigation */}
       <AdminSidebar /> {/*[cite: 2] */}
 
       <main className="lg:ml-[255px] min-h-screen">
-        {/* Top administration header */}
+        {/* Top bar header */}
         <header className="h-[82px] bg-white border-b border-[#e9e5e6] px-5 sm:px-8 flex items-center justify-between sticky top-0 z-20">
           <div>
             <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Catalog & Inventory</p>
-            <h1 className="text-xl font-semibold mt-1">Occasion Management</h1>
+            <h1 className="text-xl font-semibold mt-1">Feeling Management</h1>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
-              onClick={() => router.push('/admin/occasions/add')}
+              onClick={() => router.push('/admin/feelings')}
               className="h-10 px-3.5 sm:px-4 rounded-xl bg-[#694f5c] text-white text-xs font-semibold flex items-center gap-1.5 sm:gap-2 hover:bg-[#5a4350] shadow-[2px_2px_8px_rgba(105,79,92,0.25)] transition shrink-0"
             >
               <Plus size={16} />
-              <span>Add Occasion</span>
+              <span>Add Feeling</span>
             </button>
 
             <button
               type="button"
-              onClick={() => router.push('/admin/occasions')}
+              onClick={() => router.push('/admin/feelings')}
               className="h-10 px-3.5 sm:px-4 rounded-xl bg-[#faf7f8] text-[#6d5260] font-semibold text-xs border border-[#eee9ea] hover:bg-[#f2eaed] transition shrink-0"
             >
-              ← Back to Occasions
+              ← Back to Feelings
             </button>
           </div>
         </header>
@@ -346,19 +312,20 @@ export default function AdminOccasionsPage() {
         <div className="p-5 sm:p-8">
           <section>
             <div className="bg-white rounded-2xl p-6 shadow-[4px_4px_14px_rgba(0,0,0,0.04),-4px_-4px_14px_rgba(255,255,255,0.8)]">
-              {/* Section title header */}
+              {/* Header title and search input */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold mt-1">All Occasions</h2>
-                  <p className="text-sm text-[#8a8385] mt-1">View, search, update and delete all occasions.</p>
+                  <h2 className="text-xl font-semibold mt-1">All feelings</h2>
+                  <p className="text-sm text-[#8a8385] mt-1">View, search, update and delete all feelings.</p>
                 </div>
+
                 <div className="relative w-full sm:w-[380px]">
                   <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9a9295]" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search occasion by name..."
+                    placeholder="Search Feeling by name..."
                     className="w-full rounded-xl border border-[#e5e1e2] bg-[#faf9f9] pl-11 pr-10 py-2.5 text-sm outline-none focus:border-[#6d5260] transition"
                   />
                   {search && (
@@ -374,57 +341,56 @@ export default function AdminOccasionsPage() {
               </div>
 
               {/* Error banner message */}
-              {occasionError && (
+              {feelingError && (
                 <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                  <p className="text-sm text-red-600">{occasionError}</p>
+                  <p className="text-sm text-red-600">{feelingError}</p>
                 </div>
               )}
 
-              {/* Data table container */}
+              {/* Feelings Table Container */}
               <div className="mt-6 overflow-x-auto rounded-xl border border-[#eee9ea]">
-                <table className="w-full min-w-[760px]">
+                <table className="w-full min-w-[700px]">
                   <thead>
                     <tr className="bg-[#faf9f9] border-b border-[#eee9ea]">
                       <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8a8385]">Image</th>
-                      <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8a8385]">Occasion</th>
-                      <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8a8385]">Date</th>
-                      <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8a8385]">Status</th>
+                      <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-[#8a8385]">Feeling</th>
                       <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wide text-[#8a8385]">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {loadingOccasions ? (
+                    {/* Render loading rows */}
+                    {loadingFeelings ? (
                       <tr>
-                        <td colSpan="5" className="px-5 py-16 text-center">
+                        <td colSpan="3" className="px-5 py-16 text-center">
                           <div className="w-8 h-8 border-4 border-[#e6e1e3] border-t-[#6d5260] rounded-full animate-spin mx-auto" />
-                          <p className="text-sm text-[#8a8385] mt-3">Loading occasions...</p>
+                          <p className="text-sm text-[#8a8385] mt-3">Loading feelings...</p>
                         </td>
                       </tr>
-                    ) : processedOccasions.length === 0 ? (
+                    ) : processedFeelings.length === 0 ? (
+                      /* Render empty state */
                       <tr>
-                        <td colSpan="5" className="px-5 py-16 text-center">
+                        <td colSpan="3" className="px-5 py-16 text-center">
                           <div className="w-14 h-14 rounded-2xl bg-[#faf7f8] flex items-center justify-center mx-auto">
                             <span className="text-2xl">🌸</span>
                           </div>
-                          <p className="font-semibold mt-4 text-[#403a3d]">No occasions found</p>
-                          <p className="text-sm text-[#8a8385] mt-1">Add an occasion to see it here.</p>
+                          <p className="font-semibold mt-4 text-[#403a3d]">No feelings found</p>
+                          <p className="text-sm text-[#8a8385] mt-1">Add a feeling to see it here.</p>
                         </td>
                       </tr>
                     ) : (
-                      processedOccasions.map((occasion) => (
+                      /* Render feelings list */
+                      processedFeelings.map((feeling) => (
                         <tr
-                          key={occasion.id}
-                          className={`border-b border-[#f1eeee] last:border-0 transition ${occasion.isMatched
-                            ? 'bg-[#fdf2f4] hover:bg-[#fae7eb]'
-                            : 'bg-white hover:bg-[#fcfbfb]'
+                          key={feeling.id}
+                          className={`border-b border-[#f1eeee] last:border-0 transition ${feeling.isMatched ? 'bg-[#fdf2f4] hover:bg-[#fae7eb]' : 'bg-white hover:bg-[#fcfbfb]'
                             }`}
                         >
                           <td className="px-5 py-5">
                             <div className="w-14 h-14 rounded-xl bg-[#eee4eb] flex items-center justify-center overflow-hidden border border-[#e5dce0]">
-                              {occasion.occasionImage ? (
+                              {feeling.feelingImage ? (
                                 <img
-                                  src={occasion.occasionImage}
-                                  alt={occasion.occasionName || 'Occasion'}
+                                  src={feeling.feelingImage}
+                                  alt={feeling.feelingName || 'Feeling'}
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
@@ -435,8 +401,8 @@ export default function AdminOccasionsPage() {
 
                           <td className="px-5 py-5">
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-semibold text-[#403a3d]">{occasion.occasionName}</p>
-                              {occasion.isMatched && (
+                              <p className="text-sm font-semibold text-[#403a3d]">{feeling.feelingName}</p>
+                              {feeling.isMatched && (
                                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#694f5c] text-white">
                                   Match
                                 </span>
@@ -445,43 +411,31 @@ export default function AdminOccasionsPage() {
                           </td>
 
                           <td className="px-5 py-5">
-                            <span className="text-sm text-[#6f696b]">{formatDate(occasion.occasionDate)}</span>
-                          </td>
-
-                          <td className="px-5 py-5">
-                            <span
-                              className={`text-xs font-semibold px-2.5 py-1 rounded-full ${occasion.active !== false
-                                ? 'bg-green-50 text-green-700 border border-green-200'
-                                : 'bg-red-50 text-red-600 border border-red-200'
-                                }`}
-                            >
-                              {occasion.active !== false ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-
-                          <td className="px-5 py-5">
                             <div className="flex justify-end gap-2">
+                              {/* View detail button */}
                               <button
                                 type="button"
-                                onClick={() => setViewingOccasion(occasion)}
+                                onClick={() => setViewingFeeling(feeling)}
                                 title="View"
                                 className="w-10 h-10 rounded-xl bg-[#f4eff2] text-[#6d5260] flex items-center justify-center hover:bg-[#ebe2e7] transition"
                               >
                                 <Eye size={17} />
                               </button>
 
+                              {/* Edit details button */}
                               <button
                                 type="button"
-                                onClick={() => openEditModal(occasion)}
+                                onClick={() => openEditModal(feeling)}
                                 title="Edit"
                                 className="w-10 h-10 rounded-xl bg-[#f4eff2] text-[#6d5260] flex items-center justify-center hover:bg-[#ebe2e7] transition"
                               >
                                 <Pencil size={17} />
                               </button>
 
+                              {/* Delete feeling button */}
                               <button
                                 type="button"
-                                onClick={() => handleDelete(occasion)}
+                                onClick={() => handleDelete(feeling)}
                                 title="Delete"
                                 className="w-10 h-10 rounded-xl bg-[#fff0f2] text-[#c04b5a] flex items-center justify-center hover:bg-[#ffe2e6] transition"
                               >
@@ -496,15 +450,16 @@ export default function AdminOccasionsPage() {
                 </table>
               </div>
 
-              {/* Total counter */}
+              {/* Total counter and match indicator */}
               <div className="mt-4 flex items-center justify-between">
                 <p className="text-sm text-[#8a8385]">
-                  Total <span className="font-semibold text-[#6d5260]">{occasions.length}</span>{' '}
-                  {occasions.length === 1 ? 'occasion' : 'occasions'}
+                  Total <span className="font-semibold text-[#6d5260]">{feelings.length}</span>{' '}
+                  {feelings.length === 1 ? 'Feeling' : 'feelings'}
                 </p>
+
                 {search.trim() && (
                   <p className="text-xs text-[#6d5260] font-medium">
-                    {processedOccasions.filter((item) => item.isMatched).length} match(es) pinned to top
+                    {processedFeelings.filter((item) => item.isMatched).length} match(es) pinned to top
                   </p>
                 )}
               </div>
@@ -518,11 +473,11 @@ export default function AdminOccasionsPage() {
         </div>
       </main>
 
-      {/* Occasion view modal */}
-      {viewingOccasion && (
+      {/* View Feeling Modal */}
+      {viewingFeeling && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setViewingOccasion(null)}
+          onClick={() => setViewingFeeling(null)}
         >
           <div
             className="w-full max-w-lg bg-white rounded-2xl shadow-[8px_8px_30px_rgba(0,0,0,0.12)] overflow-hidden"
@@ -530,12 +485,13 @@ export default function AdminOccasionsPage() {
           >
             <div className="px-6 py-5 border-b border-[#eee9ea] flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Occasion Details</p>
-                <h2 className="text-xl font-semibold mt-1">View Occasion</h2>
+                <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Feeling Details</p>
+                <h2 className="text-xl font-semibold mt-1">View Feeling</h2>
               </div>
+
               <button
                 type="button"
-                onClick={() => setViewingOccasion(null)}
+                onClick={() => setViewingFeeling(null)}
                 className="w-9 h-9 rounded-xl bg-[#faf7f8] text-[#777174] hover:bg-[#f1e9ec] transition flex items-center justify-center"
               >
                 <X size={18} />
@@ -544,10 +500,10 @@ export default function AdminOccasionsPage() {
 
             <div className="p-6">
               <div className="w-full h-[280px] rounded-xl bg-[#faf9f9] overflow-hidden flex items-center justify-center border border-[#eee9ea]">
-                {viewingOccasion.occasionImage ? (
+                {viewingFeeling.feelingImage ? (
                   <img
-                    src={viewingOccasion.occasionImage}
-                    alt={viewingOccasion.occasionName || 'Occasion'}
+                    src={viewingFeeling.feelingImage}
+                    alt={viewingFeeling.feelingName || 'Feeling'}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -556,19 +512,14 @@ export default function AdminOccasionsPage() {
               </div>
 
               <div className="mt-6">
-                <p className="text-xs uppercase tracking-[0.12em] text-[#9a9295]">Occasion Name</p>
-                <h3 className="text-xl font-semibold text-[#403a3d] mt-1">{viewingOccasion.occasionName}</h3>
-              </div>
-
-              <div className="mt-5">
-                <p className="text-xs uppercase tracking-[0.12em] text-[#9a9295]">Occasion Date</p>
-                <p className="text-base font-medium text-[#6f696b] mt-1">{formatDate(viewingOccasion.occasionDate)}</p>
+                <p className="text-xs uppercase tracking-[0.12em] text-[#9a9295]">Feeling Name</p>
+                <h3 className="text-xl font-semibold text-[#403a3d] mt-1">{viewingFeeling.feelingName}</h3>
               </div>
 
               <div className="mt-5">
                 <p className="text-xs uppercase tracking-[0.12em] text-[#9a9295]">Status</p>
-                <p className={`text-sm font-semibold mt-1 ${viewingOccasion.active !== false ? 'text-green-600' : 'text-red-500'}`}>
-                  {viewingOccasion.active !== false ? 'Active' : 'Inactive'}
+                <p className={`text-sm font-semibold mt-1 ${viewingFeeling.active ? 'text-green-600' : 'text-red-500'}`}>
+                  {viewingFeeling.active ? 'Active' : 'Inactive'}
                 </p>
               </div>
 
@@ -576,14 +527,13 @@ export default function AdminOccasionsPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    const occ = viewingOccasion;
-                    setViewingOccasion(null);
-                    openEditModal(occ);
+                    setViewingFeeling(null);
+                    openEditModal(viewingFeeling);
                   }}
                   className="px-5 py-2.5 rounded-xl bg-[#6d5260] text-white text-sm font-semibold hover:bg-[#5d4650] transition flex items-center gap-2"
                 >
                   <Pencil size={16} />
-                  Edit Occasion
+                  Edit Feeling
                 </button>
               </div>
             </div>
@@ -591,15 +541,16 @@ export default function AdminOccasionsPage() {
         </div>
       )}
 
-      {/* Occasion edit modal */}
+      {/* Edit Feeling Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-[8px_8px_30px_rgba(0,0,0,0.12)]">
             <div className="px-6 py-5 border-b border-[#eee9ea] flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Occasion Management</p>
-                <h2 className="text-xl font-semibold mt-1">Update Occasion</h2>
+                <p className="text-xs uppercase tracking-[0.16em] text-[#9a9295]">Feeling Management</p>
+                <h2 className="text-xl font-semibold mt-1">Update Feeling</h2>
               </div>
+
               <button
                 type="button"
                 onClick={closeEditModal}
@@ -612,12 +563,13 @@ export default function AdminOccasionsPage() {
 
             <form onSubmit={handleUpdate} className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Image upload column */}
                 <div>
-                  <label className="text-sm font-semibold text-[#403a3d]">Occasion Image</label>
+                  <label className="text-sm font-semibold text-[#403a3d]">Feeling Image</label>
                   <div className="mt-3">
                     <div className="h-[230px] rounded-xl border border-dashed border-[#ddd5d7] bg-[#faf9f9] overflow-hidden flex items-center justify-center">
                       {previewImage ? (
-                        <img src={previewImage} alt="Occasion Preview" className="w-full h-full object-cover" />
+                        <img src={previewImage} alt="Feeling Preview" className="w-full h-full object-cover" />
                       ) : (
                         <div className="text-center">
                           <div className="text-4xl">🌸</div>
@@ -649,46 +601,38 @@ export default function AdminOccasionsPage() {
                   </div>
                 </div>
 
+                {/* Form fields column */}
                 <div>
-                  <label className="text-sm font-semibold text-[#403a3d]">Occasion Name</label>
+                  <label className="text-sm font-semibold text-[#403a3d]">Feeling Name</label>
                   <input
                     type="text"
-                    name="occasionName"
-                    value={formData.occasionName}
+                    name="feelingName"
+                    value={formData.feelingName}
                     onChange={handleChange}
                     disabled={isSaving}
-                    placeholder="e.g. Valentine's Day"
-                    className={`mt-2 w-full rounded-xl border bg-[#faf9f9] px-4 py-3 text-sm outline-none transition ${errors.occasionName ? 'border-red-400' : 'border-[#e5e1e2] focus:border-[#6d5260]'
+                    placeholder="e.g. Love"
+                    className={`mt-2 w-full rounded-xl border bg-[#faf9f9] px-4 py-3 text-sm outline-none transition ${errors.feelingName ? 'border-red-400' : 'border-[#e5e1e2] focus:border-[#6d5260]'
                       }`}
                   />
-                  {errors.occasionName && <p className="text-xs text-red-500 mt-1">{errors.occasionName}</p>}
 
-                  <label className="text-sm font-semibold text-[#403a3d] block mt-5">Occasion Date (Optional)</label>
-                  <input
-                    type="date"
-                    name="occasionDate"
-                    value={formData.occasionDate}
-                    onChange={handleChange}
-                    disabled={isSaving}
-                    className="mt-2 w-full rounded-xl border border-[#e5e1e2] bg-[#faf9f9] px-4 py-3 text-sm outline-none focus:border-[#6d5260] transition"
-                  />
+                  {errors.feelingName && <p className="text-xs text-red-500 mt-1">{errors.feelingName}</p>}
 
                   {/* Active Toggle Switch */}
-                  <div className="mt-5 flex items-center justify-between rounded-xl bg-[#faf9f9] p-4 border border-[#e5e1e2]">
+                  <div className="mt-6 flex items-center justify-between rounded-xl bg-[#faf9f9] p-4">
                     <div>
-                      <p className="text-sm font-semibold text-[#403a3d]">Active Occasion</p>
-                      <p className="text-xs text-[#8a8385] mt-0.5">Show this occasion on the website</p>
+                      <p className="text-sm font-semibold text-[#403a3d]">Active</p>
+                      <p className="text-xs text-[#8a8385] mt-1">Show this feeling to customers</p>
                     </div>
 
                     <button
                       type="button"
                       onClick={handleActiveToggle}
                       disabled={isSaving}
-                      className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${formData.active ? 'bg-[#6d5260]' : 'bg-[#d8d2d4]'
+                      className={`relative w-12 h-7 rounded-full transition ${formData.active ? 'bg-[#6d5260]' : 'bg-[#d8d2d4]'
                         }`}
                     >
                       <span
-                        className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300 ${formData.active ? 'left-6' : 'left-1'
+                        className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition ${formData.active ? 'left-6' : 'left-1'
                           }`}
                       />
                     </button>
@@ -697,12 +641,20 @@ export default function AdminOccasionsPage() {
                   <div className="mt-5 rounded-xl bg-[#faf9f9] p-4">
                     <p className="text-sm font-semibold text-[#403a3d]">Update Information</p>
                     <p className="text-xs text-[#8a8385] mt-1 leading-5">
-                      Name, date and visibility status will be updated. You can leave the date empty.
+                      Update the feeling name, active status, or replace the current image.
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* Submit Error Message */}
+              {errors.submit && (
+                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                  <p className="text-sm text-red-600">{errors.submit}</p>
+                </div>
+              )}
+
+              {/* Modal action buttons */}
               <div className="mt-7 pt-5 border-t border-[#eee9ea] flex justify-end gap-3">
                 <button
                   type="button"
@@ -726,7 +678,7 @@ export default function AdminOccasionsPage() {
                   ) : (
                     <>
                       <Pencil size={16} />
-                      Update Occasion
+                      Update Feeling
                     </>
                   )}
                 </button>

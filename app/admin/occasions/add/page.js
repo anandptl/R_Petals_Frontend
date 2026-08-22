@@ -92,10 +92,6 @@ export default function AddOccasionPage() {
             newErrors.occasionName = 'Occasion name is required.';
         }
 
-        if (!occasionDate) {
-            newErrors.occasionDate = 'Occasion date is required.';
-        }
-
         if (!image) {
             newErrors.image = 'Occasion image is required.';
         }
@@ -117,7 +113,9 @@ export default function AddOccasionPage() {
         try {
             const formData = new FormData();
             formData.append('occasionName', occasionName.trim());
-            formData.append('occasionDate', `${occasionDate}T00:00:00`);
+            if (occasionDate) {
+                formData.append('occasionDate', `${occasionDate}T00:00:00`);
+            }
             formData.append('active', String(active));
             formData.append('image', image);
 
@@ -201,7 +199,7 @@ export default function AddOccasionPage() {
                 {/* Centered Content Container */}
                 <div className="p-4 sm:p-8 mx-auto" style={{ paddingTop: '10px' }}>
                     {/* Section Title */}
-                    <section className="mt-2">
+                    <section className="mt-0">
                         <h2 className="text-3xl font-bold">Add Occasion</h2>
                         <p className="text-sm text-[#8a8385] mt-2">
                             Create a new occasion and upload its image.
@@ -209,7 +207,7 @@ export default function AddOccasionPage() {
                     </section>
 
                     {/* Form Card */}
-                    <section className="mt-8 flex flex-col items-center">
+                    <section className="mt-4 flex flex-col items-center">
                         <form
                             onSubmit={handleSubmit}
                             encType="multipart/form-data"
